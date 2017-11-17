@@ -22,7 +22,7 @@ public class Receipt implements Print {
 	 * --------------------
 	 * HEAD
 	 * --------------------
-	 * BODY TEXTBLOCK
+	 * BODY MESSAGES
 	 * --------------------
 	 * ARTICLES
 	 * --------------------

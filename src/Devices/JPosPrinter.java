@@ -50,6 +50,11 @@ public class JPosPrinter extends JPosDevice implements JPosDeviceInterface {
 	
 	
 	public void makeDemo()  {
+
+		/* this amthod does some prints on the device to see if everything works well.
+		e.g. this method is executeable during the development or when starting the application
+		 */
+
 		try{
 			// check if the cover is open
 			if (ptr.getCoverOpen() == true)

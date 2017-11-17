@@ -128,7 +128,7 @@ public class mainApplication {
 		 */
 		splashScreen.setText("Starting Main App ...");
 		splashScreen.dispose();
-		mainApplikation =  new tworunPos("tworunPOS 1.0", db, DataImporter, articleList, config, debug);
+		mainApplikation =  new tworunPos("tworunPOS 0.1", db, DataImporter, articleList, config, debug);
 		mainApplikation.show();
 		
 	}

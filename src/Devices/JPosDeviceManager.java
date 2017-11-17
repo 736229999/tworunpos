@@ -7,7 +7,7 @@ import tworunpos.DebugScreen;
 
 public class JPosDeviceManager {
 
-	// Eine (versteckte) Klassenvariable vom Typ der eigene Klasse
+	// Own Instance for singleton
 	private static JPosDeviceManager instance;
 	
 	
