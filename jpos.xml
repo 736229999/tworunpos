@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE JposEntries PUBLIC "-//JavaPOS//DTD//EN"
+                             "C:\Users\Recep Ogras\IdeaProjects\tworunposGithub\jcl.dtd">
+<JposEntries>
+<!--Saved by JavaPOS jpos.config/loader (JCL) version 2.0.1 on 2/5/03 2:24 PM-->
+    <JposEntry logicalName="POSPrinter">
+        <creation factoryClass="com.lukhan.jpos.ServiceInstanceFactory" serviceClass="com.lukhan.jpos.POSPrinterService"/>
+        <vendor name="Partner Tech Co., Ltd." url="http://www.partner.com.tw"/>
+        <jpos category="POSPrinter" version="1.8"/>
+        <product description="Thermal receipt printer" name="Thermal Printer" url="http://www.miniprinter.com"/>
+        <!--Other non JavaPOS required property (mostly vendor properties and bus specific properties i.e. RS232 )-->
+        <prop name="portName" type="String" value="USB"/>
+        <prop name="portSettings" type="String" value="9600"/>
+        <prop name="deviceClassName" type="String" value="Thermal"/>
+        <prop name="statusTimeDelay" type="Long" value="500"/>
+    </JposEntry>
+	<JposEntry logicalName="WN_BA63_USB">
+    	<creation serviceClass="com.wn.retail.jpos113.WNLineDisplayUSB" factoryClass="com.wn.retail.jpos113.WNJposServiceInstanceFactory" />
+    	<vendor url="http://www.wincor-nixdorf.com" name="Wincor Nixdorf International GmbH" />
+    	<jpos version="1.8" category="LineDisplay" />
+    	<product url="http://www.wincor-nixdorf.com" name="Wincor Nixdorf Services for JavaPOS(TM) Standard" description="BA63 line display (2X20) as USB HID device 1st instance" />
+    	<!--Other non JavaPOS required property (mostly vendor properties and bus specific properties i.e. RS232 )-->
+    	<prop name="instanceNo" value="0" type="String" />
+    	<prop name="usage" value="0x2400" type="String" />
+    	<prop name="lines" value="2" type="String" />
+    	<prop name="getDMIInfo" value="on" type="String" />
+    	<prop name="infoConnectionType" value="USB" type="String" />
+    	<prop name="mapCharacterSetDefault" value="false" type="String" />
+	</JposEntry>
+	<JposEntry logicalName="WN_TH180_USB">
+        <creation factoryClass="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterServiceInstanceFactory" serviceClass="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterDeviceAdapter"/>
+        <!-- serviceClass property is not read out by WNPOSPrinterServiceInstanceFactory; however, JPOS samples need it -->
+        <vendor name="Wincor Nixdorf" url="http://www.wincor-nixdorf.com"/>
+        <jpos category="POSPrinter" version="1.13"/>
+        <product description="TH180 one station thermal receipt printer (USB, under Windows via POSUSB.SYS)" url="http://www.wincor-nixdorf.com"/>
+
+        <!--Other non JavaPOS required property (mostly vendor properties and bus specific properties i.e. RS232 )-->
+        <prop name="deviceAdapter" value="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterDeviceAdapter"/> 
+		<prop name="dcalClass" type="String" value="com.wn.retail.jpos113.dcal.TH180CommDevice, PRT, USB"/>
+		<prop name="infoConnectionType" type="String" value="USB" />
+		<prop name="vendorID" type="String" value="0x0AA7" />
+		<prop name="productID" type="String" value="0x030B" />
+		<prop name="instanceNo" type="String" value="0" />
+        <prop name="readTimeout" type="String" value="5000"/>
+    </JposEntry>
+</JposEntries>

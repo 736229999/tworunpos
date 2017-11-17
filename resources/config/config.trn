@@ -1,0 +1,18 @@
+{
+	"debugMode":true,
+	"mongoDbLocation":"C:\Program Files\MongoDB\Server\3.4\bin",
+	"importFileType":"default",
+	"currencySymbol":"€",
+	"useCurrencySymbolOnReceipt":false,
+	"useCurrencyNameOnReceipt":false,
+	"devices":	{
+					"printer":{
+						"name":"POSPrinter",
+						"printerLineWidth":80
+					},
+					"lineDisplay":{
+						"name":"WN_BA63_USB"
+					}
+				},
+	"weighBarcodes":[28,29]
+}
