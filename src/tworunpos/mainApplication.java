@@ -1,14 +1,12 @@
 package tworunpos;
 
 
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-
-import javax.swing.*;
-import Devices.*;
+import Api.RestServer;
+import Devices.JPosDeviceManager;
 import GuiElements.TrSounds;
-
 import com.mongodb.DB;
+
+import java.io.IOException;
 
 
 public class mainApplication {
@@ -23,7 +21,10 @@ public class mainApplication {
 	
 	//device manager to manage all pos specific hardware over JPos standard
 	public static JPosDeviceManager deviceManager;
-	
+
+	//RESTful Api to import data
+	public static RestServer api;
+
 	//load config
 	private static Config config;
 	
@@ -75,7 +76,19 @@ public class mainApplication {
 		 */
 		splashScreen.setText("Starting Debugscreen ...");
 		DebugScreen debug =  DebugScreen.getInstance();
-		
+
+
+		/*
+		 * Start the API
+		 */
+		try {
+			api = new RestServer();
+			api.run();
+		} catch (Exception e1) {
+
+			e1.printStackTrace();
+		}
+
 
 		/*
 		 * Start Devicemanager
