@@ -1,15 +1,10 @@
 package tworunpos;
 
-import java.awt.SplashScreen;
+import com.mongodb.*;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.CommandResult;
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.ServerAddress;
+import java.util.Set;
 
 public class DatabaseClient extends MongoClient{
 
@@ -67,19 +62,19 @@ public class DatabaseClient extends MongoClient{
 					try{
 						
 						debug.print("MongoDB process started successfully");
-						debug.print("Connecting to collection tworunPOS");
+						debug.print("Connecting to database tworunPOS");
 						
 						MongoClientOptions mongoClientOptions =  MongoClientOptions.builder().connectTimeout(1000).build();
 						this.instance =  new DatabaseClient( this.hostName ,mongoClientOptions);
-						db = this.instance.getDB( "tworunPOS" );
+						db = this.instance.getDB( this.databaseName );
 					}catch(Exception e2){
 						
-						debug.print("Failure while connecting to collection.");
+						debug.print("Failure while connecting to database.");
 						
 						e2.printStackTrace();
 						debug.printStackTrace(e2);
 						GuiElements errorMessage = new GuiElements();
-						errorMessage.displayErrorMessageBox("Kein Datenbankverbindung!");
+						errorMessage.displayErrorMessageBox("Keine Datenbankverbindung!");
 						splashScreen.dispose();
 						return;
 					}
@@ -92,7 +87,7 @@ public class DatabaseClient extends MongoClient{
 					
 
 					GuiElements errorMessage = new GuiElements();
-					errorMessage.displayErrorMessageBox("Kein Datenbankverbindung!");
+					errorMessage.displayErrorMessageBox("Keine Datenbankverbindung 2!");
 					splashScreen.dispose();
 
 					return;
@@ -126,7 +121,7 @@ public class DatabaseClient extends MongoClient{
 	public  DB getConnectedDB(){
 		return db;
 	}
-	
+
 	public  void repairDatabase() throws UnknownHostException{
 		//db.command(new BasicDBObject("repairDatabase", 1));
 		// when
@@ -139,6 +134,25 @@ public class DatabaseClient extends MongoClient{
 		
 		instance = new DatabaseClient ();
 		db = this.instance.getDB( this.databaseName );
+	}
+
+	public boolean collectionExists(final String collectionName) {
+		Set<String> collectionNames = db.getCollectionNames();
+		for (final String name : collectionNames) {
+			if (name.equalsIgnoreCase(collectionName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean createCollection(final String collectionName) {
+		db.getCollection(collectionName);
+		if(collectionExists(collectionName)){
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 	public void close(){

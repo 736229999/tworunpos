@@ -5,17 +5,17 @@ import com.mongodb.DBObject;
 
 public class Article {
 
-	private String barcode;
-	private Integer plu;
-	private String name;
-	private ArticleUnit unit;
-	private Double priceGross;
-	private Double priceNet;
-	private Double vatPercentage;
-	private Double vatAmount;
-	private Boolean isDeposit;
-	private Boolean hasDeposit;
-	private String depositBarcode;
+	private String barcode  = "";
+	private Integer plu = -1;
+	private String name  = "";
+	private ArticleUnit unit = null;
+	private Double priceGross = -0.01;
+	private Double priceNet = -0.01;
+	private Double vatPercentage = -0.01;
+	private Double vatAmount = -0.01;
+	private Boolean isDeposit = null;
+	private Boolean hasDeposit = null;
+	private String depositBarcode = "";
 	
 	
 	
@@ -53,7 +53,7 @@ public class Article {
 		
 	}
 	
-	public Article getArticel(){
+	public Article getArticle(){
 		return this;
 	}
 	
@@ -169,18 +169,29 @@ public class Article {
 	 */
 	public BasicDBObject getMyDocument(){
 		
-		BasicDBObject document = new BasicDBObject();		
-		document.put("barcode", this.getBarcode());
-		document.put("plu", this.getPlu());
-		document.put("name", this.getName());
-		document.put("unit", this.getUnit().getUnit());
-		document.put("priceGross", this.getPriceGross());
-		document.put("priceNet", this.getPriceNet());
-		document.put("VatPercentage", this.getVatPercentage());
-		document.put("VatAmount", this.getVatAmount());
-		document.put("isDeposit", this.getIsDeposit());
-		document.put("hasDeposit", this.getHasDeposit());
-		document.put("depositBarcode", this.getDepositBarcode());
+		BasicDBObject document = new BasicDBObject();
+		if(!this.getBarcode().isEmpty())
+			document.put("barcode", this.getBarcode());
+		if(this.getPlu() > -1   )
+			document.put("plu", this.getPlu());
+		if(!this.getName().isEmpty())
+			document.put("name", this.getName());
+		if(this.getUnit() != null)
+			document.put("unit", this.getUnit().getUnit());
+		if(this.getPriceGross()  > -0.01)
+			document.put("priceGross", this.getPriceGross());
+		if(this.getPriceNet() > -0.01)
+			document.put("priceNet", this.getPriceNet());
+		if(this.getVatPercentage() > -0.01)
+			document.put("VatPercentage", this.getVatPercentage());
+		if(this.getVatAmount()  > -0.01)
+			document.put("VatAmount", this.getVatAmount());
+		if(this.getIsDeposit() != null)
+			document.put("isDeposit", this.getIsDeposit());
+		if(this.getHasDeposit() != null)
+			document.put("hasDeposit", this.getHasDeposit());
+		if(!this.getDepositBarcode().isEmpty())
+			document.put("depositBarcode", this.getDepositBarcode());
 		
 		return document;
 	}

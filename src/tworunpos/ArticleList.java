@@ -1,10 +1,7 @@
 package tworunpos;
 
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.*;
 
 public class ArticleList {
 
@@ -12,14 +9,14 @@ public class ArticleList {
 	private static DB db;
 	private static DBCollection articleCollection;
 
-	// Eine (versteckte) Klassenvariable vom Typ der eigene Klasse
+	// Singleton!
 	static ArticleList instance;
 	
 	public ArticleList(){
 		db = DatabaseClient.getInstance().getConnectedDB();
 		articleCollection = db.getCollection("articleList");
 		
-		//createDummiesInDatabase();		
+		//createDummiesInDatabase();
 	}
 	
 	public static Article lookupArticlebyPlu(int plu) throws Exception{
@@ -142,9 +139,13 @@ public class ArticleList {
 	 */
 	public void addArticle(Article article){
 		//todo upsert
-		
-		
-		articleCollection.insert(article.getMyDocument());
+
+		System.out.println(article.getMyDocument().toString());
+
+		DebugScreen.getInstance().print("DB: Start insert article into collection");
+
+		articleCollection.insert(WriteConcern.SAFE,article.getMyDocument());
+		DebugScreen.getInstance().print("DB: Insert done");
 	}
 	
 	

@@ -6,8 +6,6 @@ import Devices.JPosDeviceManager;
 import GuiElements.TrSounds;
 import com.mongodb.DB;
 
-import java.io.IOException;
-
 
 public class mainApplication {
 
@@ -114,27 +112,26 @@ public class mainApplication {
 		/*
 		 * Create the article list connected to the db
 		 */
-		splashScreen.setText("Loading Artilcle List ...");
+		splashScreen.setText("Loading Article List ...");
 		articleList = new ArticleList();
 
+//
+//
+//		/*
+//		 * start fileWatcher for incoming updates  CSV
+//		 */
+//		splashScreen.setText("Starting Importer ...");
+//		try {
+//			//if(config.getImportFileType().equals(Config.importFileTypeDefault)){
+//				DataImporter = new DataImporterDefault("C:/tworunpos/import", true,  articleList,config);
+//			//}
+////			else if (config.getImportFileType().equals(Config.importFileTypeMyaSoft)){
+////				//DataImporter = new DataImporterMyasoft("/import", true, db, articleList,config);
+////			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
-		
-		/*
-		 * start fileWatcher for incoming updates  CSV
-		 */
-		splashScreen.setText("Starting Importer ...");
-		try {
-			//if(config.getImportFileType().equals(Config.importFileTypeDefault)){
-				DataImporter = new DataImporterDefault("C:/tworunpos/import", true,  articleList,config);
-			//}
-//			else if (config.getImportFileType().equals(Config.importFileTypeMyaSoft)){
-//				//DataImporter = new DataImporterMyasoft("/import", true, db, articleList,config);
-//			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	    
 
 		/*
 		 * start the mainapplication 
