@@ -1,25 +1,21 @@
 package tworunpos;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Observable;
-import java.util.Vector;
-
-import javax.print.attribute.standard.DateTimeAtCreation;
-
 import Devices.JPosDeviceManager;
 import Exceptions.CheckoutGeneralException;
 import Exceptions.CheckoutPaymentException;
 import Prints.Receipt;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Observable;
+import java.util.Vector;
 
 
 
@@ -84,7 +80,7 @@ public class Cart extends Observable {
 	public Cart(){
 		
 		dateTimeAtStartTransaction = new Date();
-		transactionCollection = db.getCollection("transactions");
+		transactionCollection = db.getCollection("transactionsList");
 	}
 	
 
@@ -444,16 +440,15 @@ public class Cart extends Observable {
 	public BasicDBObject getMyDocument(){
 		
 		//create basic transaction attributes
-		BasicDBObject mainDocument = new BasicDBObject();		
+		BasicDBObject mainDocument = new BasicDBObject();
+		mainDocument.put("transactionZ", 1); //todo bind to Z-Number
 		mainDocument.put("transaction", this.dateTimeAtStartTransaction);
 		mainDocument.put("transactionDateTimeAtStart", this.dateTimeAtStartTransaction);
 		mainDocument.put("transactionDateTimeAtEnd", this.dateTimeAtEndTransaction);
-		mainDocument.put("transactionType", "POS");
-		mainDocument.put("transactionPaymentType", paymentType);
+		mainDocument.put("transactionType", "POS"); //todo
 		mainDocument.put("transactionAmountGross", this.getSumOfCartGross());
 		mainDocument.put("transactionAmountNet", this.getSumOfCartNet());
-
-		mainDocument.put("cashierId", 1);
+		mainDocument.put("cashierId", 1); //todo program cashiers
 			
 		//create lines of transaction
 		BasicDBList  lines = new BasicDBList();	
@@ -466,7 +461,7 @@ public class Cart extends Observable {
 		BasicDBObject paymentInfo = new BasicDBObject();		
 		paymentInfo.put("paymentType", paymentType);
 		paymentInfo.put("paymentGiven", paymentGiven);
-		paymentInfo.put("paymentRest", 123);
+		paymentInfo.put("paymentRest", 123); //todo
 		mainDocument.put("paymentInfo", paymentInfo);
 
 		
