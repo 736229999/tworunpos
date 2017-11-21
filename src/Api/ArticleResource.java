@@ -46,11 +46,12 @@ public class ArticleResource
                 String postArticleBarcode = (String) jsonObject.get("barcode");
                 ArticleUnit postArticleUnit = new ArticleUnit ((String) jsonObject.get("unit"));
                 Double postArticleSalesprice = (double) jsonObject.get("salesprice");
-                Article a = new Article(postArticleBarcode,postArticleName,postArticleUnit,postArticleSalesprice);
+
+
+                Double postArticleVatPercent =  Double.parseDouble(jsonObject.get("vatpercent").toString());
+                Article a = new Article(postArticleBarcode,postArticleName,postArticleUnit,postArticleSalesprice,postArticleVatPercent);
                 debugScreen.print ("API: Article for Input created: "+a.getName());
                 debugScreen.print (a.getBarcode());
-                debugScreen.print (a.getUnit().getNameGerman());
-                debugScreen.print (a.getPriceGross().toString());
 
                 //write article into db
                 ArticleList.getInstance().addArticle(a);
@@ -70,4 +71,18 @@ public class ArticleResource
                 Article article = ArticleList.getInstance().lookupArticleByBarcode(barcode);
                 return Response.status(200).entity(article.getMyDocument().toString()).build();
         }
+
+
+        @GET
+        @Path("/drop/{code}")
+        public Response dropArticles(@PathParam("code") String code) throws Exception {
+                String output ="{}";
+                debugScreen.print ("drop called: "+code);
+                if(code.equals("tworun")){
+                        ArticleList.getInstance().drop();
+                }
+                debugScreen.print ("drop done");
+                return Response.status(200).entity("{}").build();
+        }
+
 }

@@ -5,17 +5,17 @@ import com.mongodb.DBObject;
 
 public class Article {
 
-	private String barcode  = "";
-	private Integer plu = -1;
-	private String name  = "";
-	private ArticleUnit unit = null;
-	private Double priceGross = -0.01;
-	private Double priceNet = -0.01;
-	private Double vatPercentage = -0.01;
-	private Double vatAmount = -0.01;
-	private Boolean isDeposit = null;
-	private Boolean hasDeposit = null;
-	private String depositBarcode = "";
+	private String barcode;
+	private Integer plu;
+	private String name ;
+	private ArticleUnit unit;
+	private Double priceGross;
+	private Double priceNet ;
+	private Double vatPercentage;
+	private Double vatAmount;
+	private Boolean isDeposit;
+	private Boolean hasDeposit;
+	private String depositBarcode;
 	
 	
 	
@@ -45,19 +45,22 @@ public class Article {
 	}
 	
 	
-	public Article(String barcode, String name, ArticleUnit unit, Double priceGross ){
+	public Article(String barcode, String name, ArticleUnit unit, Double priceGross, Double vatPercentage ){
 		setBarcode(barcode);
 		setName(name);
 		setUnit(unit);
 		setPriceGross(priceGross);
-		
+		setVatPercentage(vatPercentage);
+		Double priceNet = priceGross/(1+(vatPercentage/100));
+		setPriceNet(priceNet);
+		setVatAmount(priceGross-priceNet);
 	}
 	
 	public Article getArticle(){
 		return this;
 	}
 	
-	public int getPlu() {
+	public Integer getPlu() {
 		return plu;
 	}
 	public void setPlu(int plu) {
@@ -172,25 +175,25 @@ public class Article {
 		BasicDBObject document = new BasicDBObject();
 		if(!this.getBarcode().isEmpty())
 			document.put("barcode", this.getBarcode());
-		if(this.getPlu() > -1   )
+		if(this.getPlu()!= null )
 			document.put("plu", this.getPlu());
 		if(!this.getName().isEmpty())
 			document.put("name", this.getName());
 		if(this.getUnit() != null)
 			document.put("unit", this.getUnit().getUnit());
-		if(this.getPriceGross()  > -0.01)
+		if(this.getPriceGross()  != null)
 			document.put("priceGross", this.getPriceGross());
-		if(this.getPriceNet() > -0.01)
+		if(this.getPriceNet() != null)
 			document.put("priceNet", this.getPriceNet());
-		if(this.getVatPercentage() > -0.01)
+		if(this.getVatPercentage() != null)
 			document.put("VatPercentage", this.getVatPercentage());
-		if(this.getVatAmount()  > -0.01)
+		if(this.getVatAmount()  != null)
 			document.put("VatAmount", this.getVatAmount());
 		if(this.getIsDeposit() != null)
 			document.put("isDeposit", this.getIsDeposit());
 		if(this.getHasDeposit() != null)
 			document.put("hasDeposit", this.getHasDeposit());
-		if(!this.getDepositBarcode().isEmpty())
+		if(this.getDepositBarcode() != null)
 			document.put("depositBarcode", this.getDepositBarcode());
 		
 		return document;
@@ -201,11 +204,15 @@ public class Article {
 		CartArticle cartArticle = new CartArticle();
 		
 		cartArticle.setBarcode(barcode);
-		cartArticle.setDepositBarcode(depositBarcode);
-		cartArticle.setHasDeposit(hasDeposit);
-		cartArticle.setIsDeposit(isDeposit);
+		if(depositBarcode != null)
+			cartArticle.setDepositBarcode(depositBarcode);
+		if(hasDeposit != null)
+			cartArticle.setHasDeposit(hasDeposit);
+		if(isDeposit != null)
+			cartArticle.setIsDeposit(isDeposit);
 		cartArticle.setName(name);
-		cartArticle.setPlu(plu);
+		if(plu != null)
+			cartArticle.setPlu(plu);
 		cartArticle.setPriceGross(priceGross);
 		cartArticle.setPriceNet(priceNet);
 		cartArticle.setUnit(unit);

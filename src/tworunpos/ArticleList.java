@@ -55,7 +55,7 @@ public class ArticleList {
 		// B = Articlecode
 		// P = Checksum
 		// C = quantity in grams
-		DebugScreen.getInstance().print("isWeighArticleByBarcode:"+Article.isWeighArticleByBarcode(barcode)+"  Barcode:"+barcode);
+
 		if(Article.isWeighArticleByBarcode(barcode)){
 			
 			String quantity = barcode.substring(8,12);
@@ -76,7 +76,7 @@ public class ArticleList {
 
 		
 		if(foundDocument != null){
-			System.out.println("FOUND: "+foundDocument.toString());
+			System.out.println("FOUND Article: "+foundDocument.toString());
 			System.out.println("Start Converting Doc to Article");
 			Article foundArticle = new Article(foundDocument);
 			DebugScreen.getInstance().print("Converted Article Name:"+foundArticle.getName());
