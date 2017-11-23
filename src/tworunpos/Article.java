@@ -18,8 +18,8 @@ public class Article {
 	private String depositBarcode;
 	
 	
-	
-	public Article(){		
+
+	public Article(){
 	}
 	
 	public Article(DBObject articleDbObject){		

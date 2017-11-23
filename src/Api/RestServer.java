@@ -17,6 +17,7 @@ public class RestServer extends Thread{
         ResourceConfig config = new ResourceConfig();
         config.registerClasses(HalloWeltService.class);
         config.registerClasses(ArticleResource.class);
+        config.registerClasses(TransactionResource.class);
         final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(
                 URI.create(baseUrl),config, false);
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -32,11 +33,9 @@ public class RestServer extends Thread{
             e.printStackTrace();
         }
 
-        System.out.println("REST-API started successfully!");
         debugScreen.print("REST-API started successfully!");
 
-        System.out.println(String.format("\nGrizzly-HTTP-Server gestartet mit der URL: %s\n"
-                        + "Stoppen des Grizzly-HTTP-Servers mit:      Strg+C\n",
+        System.out.println(String.format("\nGrizzly-HTTP-Server gestartet mit der URL: %s\n",
                 baseUrl + HalloWeltService.webContextPath));
 
         //Thread.currentThread().join();

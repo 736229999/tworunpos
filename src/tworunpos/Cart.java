@@ -1,6 +1,7 @@
 package tworunpos;
 
 import Devices.JPosDeviceManager;
+import Devices.JPosPrinter;
 import Exceptions.CheckoutGeneralException;
 import Exceptions.CheckoutPaymentException;
 import Prints.Receipt;
@@ -36,8 +37,8 @@ public class Cart extends Observable {
 	//vars to be filled to be able to checkout
 	private String paymentType;
 	private Double paymentGiven;
-	
-	
+
+
 	//receipt to be printed out
 	private Receipt receipt = new Receipt();
 	
@@ -80,7 +81,7 @@ public class Cart extends Observable {
 	public Cart(){
 		
 		dateTimeAtStartTransaction = new Date();
-		transactionCollection = db.getCollection("transactionsList");
+		transactionCollection = db.getCollection("transactionList");
 	}
 	
 
@@ -272,7 +273,10 @@ public class Cart extends Observable {
 	public void clear(){
 		removeAllArticles();
 	}
-	
+	public void drop(){
+		removeAllArticles();
+	}
+
 	public void removeAllArticles(){
 		setChanged();
 		cart.clear();
@@ -293,12 +297,12 @@ public class Cart extends Observable {
 		
 	}
 	
-	public Float getSumOfCartGross(){
-		Float sum = 0.00F;
+	public Double getSumOfCartGross(){
+		Double sum = 0.00D;
 		for (int i=0; i < cart.size(); i++)
-			sum = (float) (sum + cart.elementAt(i).getPriceGrossTotal());
+			sum = (Double) (sum + cart.elementAt(i).getPriceGrossTotal());
 		
-		return sum;
+		return  sum;
 	}
 	
 	
@@ -378,60 +382,80 @@ public class Cart extends Observable {
 		}
 		
 	}
-	
-	public Boolean finilize() throws CheckoutPaymentException,CheckoutGeneralException{
-		
+
+
+	/*
+	This method is the final checkout step! It will save the transaction to the database.
+	 */
+	public Boolean finilize() throws CheckoutPaymentException,CheckoutGeneralException {
+
 		//check if everthing is ok
-		
+
 		//check if articles are in the cart
-		if(cart.isEmpty()){
+		if (cart.isEmpty()) {
 			throw new CheckoutGeneralException("Bitte zuerst Artikel einscannen/eingeben!");
 		}
-		
-		
-		//check payment type
-		if(paymentType == null){
+
+
+		//check payment details
+		if (paymentType == null) {
 			throw new CheckoutPaymentException("Bitte eine Zahlungsart wählen!");
 		}
 
-		//check if amount is positive or not // if not it means we ahve to do a payout
-		if(this.getSumOfCartGross() <= 0){
-			
+		//check if amount is positive or not // if not it means we have to do a payout
+		if (this.getSumOfCartGross() <= 0) {
+
 		}
-		
-		if(this.getSumOfCartGross() > 0 && (paymentGiven == null || paymentGiven <= 0)){
+
+		if (this.getSumOfCartGross() > 0 && (paymentGiven == null || paymentGiven <= 0)) {
 			throw new CheckoutPaymentException("Bitte einen Zahlungsbetrag eingeben!");
 		}
-		
-		if(Helpers.roundForCurrency(paymentGiven) < Helpers.roundForCurrency(this.getSumOfCartGross())){
+
+		if (Helpers.roundForCurrency(paymentGiven) < Helpers.roundForCurrency(this.getSumOfCartGross())) {
 			throw new CheckoutPaymentException("Der Zahlbetrag ist nicht hoch genug!!");
 		}
-		
-		
-		
-		
-		dateTimeAtEndTransaction = new Date();
-		BasicDBObject transactionObject = getMyDocument();
-		transactionCollection.insert(transactionObject);
+
+		//prepare for receipt printout
 		this.createGroupedTaxes();
-		
-		//print receipt
 		DebugScreen.getInstance().clear();
 		DebugScreen.getInstance().print("Start Print Receipt");
-		receipt.setArticlesFromCart(this);
-		receipt.setTaxesFromCart(this);
+		receipt.setArticles(this);
+		receipt.setTaxes(this);
+
+		//save transaction in db
+		dateTimeAtEndTransaction = new Date();
+		Transaction transaction = new Transaction(this);
+		TransactionList transactionList = TransactionList.getInstance();
+		transactionList.addTransaction(transaction);
+
+		//BasicDBObject transactionObject = getMyDocument();
+		//transactionCollection.insert(transactionObject);
+
+
+
+
+		//print receipt
+		JPosPrinter printer = null;
 		try {
-			JPosDeviceManager.getInstance().getPrinter().print(receipt.toString());
+			printer = JPosDeviceManager.getInstance().getPrinter();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+
+		if (printer != null) {
+			try {
+				printer.print(receipt.toString());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		DebugScreen.getInstance().print(receipt.toString());
 		DebugScreen.getInstance().print("End Print Receipt");
-		
+
 		return true;
-		
-		
+
+
 	}
 	
 	/*
@@ -499,8 +523,46 @@ public class Cart extends Observable {
 		
 		this.paymentGiven = oldVal;
 	}
-	
-	
+
+	public Receipt getReceipt() {
+		return receipt;
+	}
+
+	public Integer getCountOfReturnedArticles() {
+		Integer count = 0;
+		for (int i=0; i < cart.size(); i++){
+			if(cart.elementAt(i).isRefund())
+				count++;
+		}
+		return count;
+	}
+
+	public Double getSumOfReturnedArticlesInclTax() {
+		Double sum = 0.00;
+		for (int i=0; i < cart.size(); i++){
+			if(cart.elementAt(i).isRefund())
+				sum =+ cart.elementAt(i).getPriceGrossTotal();
+		}
+		return sum;
+	}
+
+	public Double getSumOfReturnedArticlesExclTax() {
+		Double sum = 0.00;
+		for (int i=0; i < cart.size(); i++){
+			if(cart.elementAt(i).isRefund())
+				sum =+ cart.elementAt(i).getPriceNetTotal();
+		}
+		return sum;
+	}
+
+	public Date getDateTimeAtStartTransaction() {
+		return dateTimeAtStartTransaction;
+	}
+
+	public Date getDateTimeAtEndTransaction() {
+		return dateTimeAtEndTransaction;
+	}
+
 	public void reset(){
 		removeAllArticles();
 		instance = null;

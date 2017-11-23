@@ -18,8 +18,7 @@ public class JPosDeviceManager {
 		//System.setProperty("jpos.config.populatorFile", "jpos.xml");
 		//System.setProperty(JposPropertiesConst.JPOS_POPULATOR_FILE_PROP_NAME, "jpos.xml");
 		
-		
-		//printer = new JPosPrinter("POSPrinter");
+//		printer = new JPosPrinter("POSPrinter");
 //		printer = new JPosPrinter("WN_TH180_USB");
 //		printer.makeDemo();
 //		lineDisplay = new JLineDisplay("WN_BA63_USB");
