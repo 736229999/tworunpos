@@ -9,10 +9,16 @@ public class CartArticle extends Article{
 	private Boolean isRefund = false;
 	private char letterIdOfTaxGroup ;
 	private float quantity = 1;
-	
 
 
-	public CartArticle(){		
+	public CartArticle() {
+	}
+
+	public CartArticle(DBObject articleDbObject){
+		super(articleDbObject);
+		isRefund =  (articleDbObject.get("isRefund") != null ? (Boolean) articleDbObject.get("isRefund"):null);
+		//letterIdOfTaxGroup =  (articleDbObject.get("letterIdOfTaxGroup") != null ? (char) articleDbObject.get("letterIdOfTaxGroup"):null);
+		quantity =  (articleDbObject.get("quantity") != null ? Float.parseFloat(articleDbObject.get("quantity").toString()):null);
 	}
 
 	

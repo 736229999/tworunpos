@@ -287,8 +287,8 @@ public class Receipt implements Print {
 	
 	public void setArticles(Cart cart){
 		addNewEmptyLineToBody();
-		for(int i = 0; i < cart.getCart().size();i++){
-			addNewArticleLine(cart.getCart().get(i));
+		for(int i = 0; i < cart.getArticles().size(); i++){
+			addNewArticleLine(cart.getArticles().get(i));
 		}
 		
 		

@@ -5,10 +5,7 @@ import Devices.JPosPrinter;
 import Exceptions.CheckoutGeneralException;
 import Exceptions.CheckoutPaymentException;
 import Prints.Receipt;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
+import com.mongodb.*;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -25,7 +22,7 @@ public class Cart extends Observable {
 	// Eine (versteckte) Klassenvariable vom Typ der eigene Klasse
 	private static Cart instance = null;
 	
-	private Vector<CartArticle> cart = new Vector<CartArticle>(); 
+	private Vector<CartArticle> articles = new Vector<CartArticle>();
 	private DB db = DatabaseClient.getInstance().getConnectedDB();
 	private DBCollection transactionCollection;
 	
@@ -37,7 +34,11 @@ public class Cart extends Observable {
 	//vars to be filled to be able to checkout
 	private String paymentType;
 	private Double paymentGiven;
-
+	private String transactionType;
+	private Integer transactionZ;
+	private Double transactionAmountGross;
+	private Double 	transactionAmountNet;
+	private Integer cashierId;
 
 	//receipt to be printed out
 	private Receipt receipt = new Receipt();
@@ -76,8 +77,35 @@ public class Cart extends Observable {
 		  }
 
 	}
-	
-	
+
+
+	public Cart(DBObject cartObject){
+//todo save all articles as well for the transfer
+
+
+
+		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
+		transactionZ = (cartObject.get("transactionZ") != null ? (Integer) cartObject.get("transactionZ"):null);
+		dateTimeAtStartTransaction =  (cartObject.get("dateTimeAtStartTransaction") != null ?  (Date) ( cartObject.get("dateTimeAtStartTransaction")) :null);
+		dateTimeAtEndTransaction = (cartObject.get("dateTimeAtEndTransaction") != null ?  (Date) cartObject.get("dateTimeAtEndTransaction") :null);
+		transactionType = (cartObject.get("transactionType") != null ?   cartObject.get("transactionType").toString() : null );
+		transactionAmountGross = (cartObject.get("transactionAmountGross") != null ?   (Double) cartObject.get("transactionAmountGross") : null );
+		transactionAmountNet =  (cartObject.get("transactionAmountNet") != null ? (Double) cartObject.get("transactionAmountNet"):null);
+		cashierId =  (cartObject.get("cashierId") != null ? (Integer) cartObject.get("cashierId"):null);
+
+		//create lines of transaction
+		BasicDBList articlesDBList = (BasicDBList) cartObject.get("transactionLines");
+		BasicDBObject[] articlesArray = articlesDBList.toArray(new BasicDBObject[0]);
+		for(BasicDBObject dbObj : articlesArray) {
+			// add each item from the articlesArray to articles List
+			CartArticle ca = new CartArticle(dbObj);
+			articles.add(ca);
+		}
+
+
+
+	}
+
 	public Cart(){
 		
 		dateTimeAtStartTransaction = new Date();
@@ -85,8 +113,8 @@ public class Cart extends Observable {
 	}
 	
 
-	public Vector<CartArticle> getCart(){
-		return cart;
+	public Vector<CartArticle> getArticles(){
+		return articles;
 	}
 	
 	
@@ -177,7 +205,7 @@ public class Cart extends Observable {
 	public void addSimpleArticle(CartArticle article){
 		//SIMPLE ARTICLE INTO CART
 				//add this article to the cart vector
-				cart.add(article);
+				articles.add(article);
 				notifyObservers( new Object[]{"add", article} );			
 			
 
@@ -189,7 +217,7 @@ public class Cart extends Observable {
 						setChanged();
 						CartArticle depositArticle = ArticleList.lookupArticleByBarcode(article.getDepositBarcode()).toCartArticle();
 						System.out.println("deposite: "+depositArticle);
-						cart.add(depositArticle);
+						articles.add(depositArticle);
 						notifyObservers( new Object[]{"add", depositArticle} );
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -231,7 +259,7 @@ public class Cart extends Observable {
 		article.setPriceGross(-article.getPriceGross());
 		article.setPriceNet(-article.getPriceNet());
 		article.setIsRefund(true);
-		cart.add(article);
+		articles.add(article);
 		notifyObservers( new Object[]{"removeByArticleWithNotification", article}  );
 	}
 	
@@ -239,15 +267,15 @@ public class Cart extends Observable {
 	
 	public void removeArticlebyArticle(CartArticle article){
 		setChanged();
-		cart.remove(article);
+		articles.remove(article);
 		notifyObservers( new Object[]{"removeByArticle", article}  );
 	}
 
 	
 	public void removeArticlebyPosition(int position){
 		setChanged();
-		Article article = cart.get(position);
-		cart.remove(position);
+		Article article = articles.get(position);
+		articles.remove(position);
 		notifyObservers( new Object[]{"removeByPosition", position, article}  );
 
 		
@@ -255,11 +283,11 @@ public class Cart extends Observable {
 		//remove also related article (deposit)
 		if(article.hasDeposit()){
 			String articlesDepositBarcode = article.getDepositBarcode();
-			for(int i = position; i < cart.size(); i++){
-				Article tempDepositeArticle = cart.get(position);
+			for(int i = position; i < articles.size(); i++){
+				Article tempDepositeArticle = articles.get(position);
 				if(tempDepositeArticle.getBarcode().equals(articlesDepositBarcode)){
 					setChanged();
-					cart.remove(position);
+					articles.remove(position);
 					notifyObservers( new Object[]{"removeByPosition", position, tempDepositeArticle}  );
 
 				}
@@ -279,28 +307,28 @@ public class Cart extends Observable {
 
 	public void removeAllArticles(){
 		setChanged();
-		cart.clear();
+		articles.clear();
 		notifyObservers( new Object[]{"removeAllArticles"}  );
 	}
 	
 	public CartArticle getArticleFromCart(int position){
 		
-		return  (CartArticle) cart.get(position);
+		return  (CartArticle) articles.get(position);
 	}
 	
 	
 	public void dublicateLastArticleInCart() throws Exception{
-		if(cart.size()<1)
+		if(articles.size()<1)
 			return;
 		
-		addArticle(cart.get(cart.size()-1), 1);			
+		addArticle(articles.get(articles.size()-1), 1);
 		
 	}
 	
 	public Double getSumOfCartGross(){
 		Double sum = 0.00D;
-		for (int i=0; i < cart.size(); i++)
-			sum = (Double) (sum + cart.elementAt(i).getPriceGrossTotal());
+		for (int i=0; i < articles.size(); i++)
+			sum = (Double) (sum + articles.elementAt(i).getPriceGrossTotal());
 		
 		return  sum;
 	}
@@ -308,8 +336,8 @@ public class Cart extends Observable {
 	
 	public Double getSumOfCartNet(){
 		Double sum = 0.00D;
-		for (int i=0; i < cart.size(); i++)
-			sum = Double.sum( sum , cart.elementAt(i).getPriceNetTotal() );
+		for (int i=0; i < articles.size(); i++)
+			sum = Double.sum( sum , articles.elementAt(i).getPriceNetTotal() );
 		return sum;
 	}
 	
@@ -326,12 +354,12 @@ public class Cart extends Observable {
 		groupedTaxes = new ArrayList<GroupedTaxStruct>();
 
 		//iterate over cart to check all articles
-		for (int i=0; i < cart.size(); i++){
-			String name = cart.get(i).getVatPercentage()+"";
-			Double value =  cart.get(i).getVatPercentage();
-			Double vatAmount = cart.get(i).getVatAmountTotal();
-			Double netAmount = cart.get(i).getPriceNetTotal();
-			Double grossAmount = cart.get(i).getPriceGrossTotal();
+		for (int i=0; i < articles.size(); i++){
+			String name = articles.get(i).getVatPercentage()+"";
+			Double value =  articles.get(i).getVatPercentage();
+			Double vatAmount = articles.get(i).getVatAmountTotal();
+			Double netAmount = articles.get(i).getPriceNetTotal();
+			Double grossAmount = articles.get(i).getPriceGrossTotal();
 			char letterId = '\0';
 			
 			//group them
@@ -362,7 +390,7 @@ public class Cart extends Observable {
 			}
 	
 			//Since we are here and defined the letterId, we will write back the letterId back into CartArticle as well.
-			cart.get(i).setLetterIdOfTaxGroup(letterId);
+			articles.get(i).setLetterIdOfTaxGroup(letterId);
 			
 		}
 		DebugScreen.getInstance().print("End creating grouped taxes");
@@ -375,10 +403,10 @@ public class Cart extends Observable {
 	
 	
 	public void debug(){
-		System.out.println("Cartsize: "+cart.size());
+		System.out.println("Cartsize: "+articles.size());
 		
-		for(int i = 0; i < cart.size();i++){
-			System.out.println(i+": "+cart.elementAt(i).toString());
+		for(int i = 0; i < articles.size();i++){
+			System.out.println(i+": "+articles.elementAt(i).toString());
 		}
 		
 	}
@@ -392,7 +420,7 @@ public class Cart extends Observable {
 		//check if everthing is ok
 
 		//check if articles are in the cart
-		if (cart.isEmpty()) {
+		if (articles.isEmpty()) {
 			throw new CheckoutGeneralException("Bitte zuerst Artikel einscannen/eingeben!");
 		}
 
@@ -476,17 +504,19 @@ public class Cart extends Observable {
 			
 		//create lines of transaction
 		BasicDBList  lines = new BasicDBList();	
-		for(int i = 0; i < cart.size();i++){
-			lines.add(cart.elementAt(i).getMyDocument() );
+		for(int i = 0; i < articles.size();i++){
+			lines.add(articles.elementAt(i).getMyDocument() );
 		}
 		mainDocument.put("transactionLines", lines);
 		
+/*
 		//payment info
 		BasicDBObject paymentInfo = new BasicDBObject();		
 		paymentInfo.put("paymentType", paymentType);
 		paymentInfo.put("paymentGiven", paymentGiven);
 		paymentInfo.put("paymentRest", 123); //todo
 		mainDocument.put("paymentInfo", paymentInfo);
+*/
 
 		
 		return mainDocument;
@@ -530,8 +560,8 @@ public class Cart extends Observable {
 
 	public Integer getCountOfReturnedArticles() {
 		Integer count = 0;
-		for (int i=0; i < cart.size(); i++){
-			if(cart.elementAt(i).isRefund())
+		for (int i=0; i < articles.size(); i++){
+			if(articles.elementAt(i).isRefund())
 				count++;
 		}
 		return count;
@@ -539,18 +569,18 @@ public class Cart extends Observable {
 
 	public Double getSumOfReturnedArticlesInclTax() {
 		Double sum = 0.00;
-		for (int i=0; i < cart.size(); i++){
-			if(cart.elementAt(i).isRefund())
-				sum =+ cart.elementAt(i).getPriceGrossTotal();
+		for (int i=0; i < articles.size(); i++){
+			if(articles.elementAt(i).isRefund())
+				sum =+ articles.elementAt(i).getPriceGrossTotal();
 		}
 		return sum;
 	}
 
 	public Double getSumOfReturnedArticlesExclTax() {
 		Double sum = 0.00;
-		for (int i=0; i < cart.size(); i++){
-			if(cart.elementAt(i).isRefund())
-				sum =+ cart.elementAt(i).getPriceNetTotal();
+		for (int i=0; i < articles.size(); i++){
+			if(articles.elementAt(i).isRefund())
+				sum =+ articles.elementAt(i).getPriceNetTotal();
 		}
 		return sum;
 	}

@@ -43,11 +43,14 @@ A Transaction represents a finilized sales process. That means items has beeen a
 		countOfReturnedArticles = (transactionDbObject.get("countOfReturnedArticles") != null ? (Integer) (transactionDbObject.get("countOfReturnedArticles")):null);
 		sumOfReturnedArticlesInclTax = (transactionDbObject.get("sumOfReturnedArticlesInclTax") != null ? (Double) transactionDbObject.get("sumOfReturnedArticlesInclTax"):null);
 		sumOfReturnedArticlesExclTax = (transactionDbObject.get("sumOfReturnedArticlesExclTax") != null ? (Double) transactionDbObject.get("sumOfReturnedArticlesExclTax"):null);
+		cart = (transactionDbObject.get("cart") != null ? new Cart((DBObject) transactionDbObject.get("cart")):null);
+
 	}
 
 
 
-	public Transaction(Cart cart){
+	public Transaction(Cart cartObj){
+		cart = cartObj;
 		zReference = 1;
 		dateTimeAtStartTransaction = cart.getDateTimeAtStartTransaction();
 		dateTimeAtEndTransaction = cart.getDateTimeAtEndTransaction();
@@ -61,7 +64,7 @@ A Transaction represents a finilized sales process. That means items has beeen a
 		countOfReturnedArticles = cart.getCountOfReturnedArticles() ;
 		sumOfReturnedArticlesInclTax = cart.getSumOfReturnedArticlesInclTax();
 		sumOfReturnedArticlesExclTax = cart.getSumOfReturnedArticlesExclTax();
-		cart = this.cart;
+
 	}
 
 
@@ -101,6 +104,8 @@ A Transaction represents a finilized sales process. That means items has beeen a
 			mainDocument.put("paymentChange",paymentChange);
 		if(receipt != null )
 			mainDocument.put("receipt",receipt);
+		if(cart != null )
+			mainDocument.put("cart",cart.getMyDocument());
 		if(countOfReturnedArticles != null )
 			mainDocument.put("countOfReturnedArticles",countOfReturnedArticles);
 		if(sumOfReturnedArticlesInclTax != null )
