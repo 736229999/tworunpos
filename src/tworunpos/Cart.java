@@ -80,9 +80,6 @@ public class Cart extends Observable {
 
 
 	public Cart(DBObject cartObject){
-//todo save all articles as well for the transfer
-
-
 
 		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
 		transactionZ = (cartObject.get("transactionZ") != null ? (Integer) cartObject.get("transactionZ"):null);

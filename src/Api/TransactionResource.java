@@ -1,15 +1,16 @@
 package Api;
 
 
-
-import tworunpos.TransactionList;
+import org.json.simple.JSONObject;
 import tworunpos.DebugScreen;
 import tworunpos.Transaction;
+import tworunpos.TransactionList;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 
 @Path("transaction")
 public class TransactionResource
@@ -20,28 +21,7 @@ public class TransactionResource
 
 
 
-/* NO CREATE FUNCTION FOR TRANSACTION - SINGLE POINT OF TRANSACTION IS THE POS
-        @POST
-        @Path("/add")
-        @Produces(MediaType.APPLICATION_JSON)
-        @Consumes(MediaType.APPLICATION_JSON)
-        /*public Response createArticle(String msg) throws ParseException {
-                String output ="{}";
-                return Response.status(200).entity(output).build();
-        }*/
-
-        @GET
-        @Path("/count/{count}/skip/{skip}")
-        public Response getTransactionsByCount(@PathParam("count") String count, @PathParam("skip") String skip) throws Exception {
-                String output ="{}";
-                debugScreen.print ("getTransactionsByCount called: "+count+" - skip:"+skip);
-                //todo
-                debugScreen.print ("getTransactionsByCount done");
-                return Response.status(200).entity("{}").build();
-        }
-
-
-        @GET
+        /*@GET
         @Path("/datefrom/{datefrom}/dateto/{dateto}")
         public Response getTransactionsByDate(@PathParam("datefrom") String dateFrom,@PathParam("dateto") String dateTo) throws Exception {
                 String output ="{}";
@@ -50,18 +30,33 @@ public class TransactionResource
                 debugScreen.print ("getTransactionsByDate done");
                 return Response.status(200).entity("{}").build();
         }
-
+*/
 
         @GET
-        @Path("/today")
-        public Response getTransactionsOfToday() throws Exception {
+        @Path("/{count}/{offset}")
+        public Response getTransactions(@PathParam("count") Integer count,@PathParam("offset") Integer offset) throws Exception {
                 String output ="{}";
-                debugScreen.print ("getTransactionsOfToday called");
+                debugScreen.print ("getTransactions called");
 
-                Transaction transaction;
+                ArrayList<Transaction> transactionsList = null;
+                try {
+                        transactionsList = TransactionList.getInstance().getTransactions(count,offset);
+                } catch (Exception e) {
+                        debugScreen.print (e.getMessage());
+                        return Response.status(204).entity(output).build();
+                }
 
-                debugScreen.print ("getTransactionsOfToday done");
-                return Response.status(200).entity("{}").build();
+                //convert for output
+                JSONObject json = new JSONObject();
+
+                for (int i = 0; i < transactionsList.size(); i++) {
+                        json.put(i,transactionsList.get(i).getMyDocument());
+                }
+
+                output = json.toJSONString().replaceAll("\\\\", "");
+
+                debugScreen.print ("getTransactions done");
+                return Response.status(200).entity(output).build();
         }
 
 
@@ -78,6 +73,7 @@ public class TransactionResource
                         debugScreen.print (e.getMessage());
                         return Response.status(204).entity(output).build();
                 }
+
                 output = transaction.getMyDocument().toString();
 
                 debugScreen.print ("getTransactionsOfToday done");

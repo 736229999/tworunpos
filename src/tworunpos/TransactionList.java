@@ -3,6 +3,8 @@ package tworunpos;
 
 import com.mongodb.*;
 
+import java.util.ArrayList;
+
 public class TransactionList {
 
 
@@ -48,37 +50,28 @@ public class TransactionList {
 	/*
 	This method will return a list of Transaction by count (newest ones, with shift)
 	 */
-	/*public static Transaction getTransactionsByCount(int count, int skip) throws Exception{
+	public static ArrayList<Transaction> getTransactions(int count, int skip) throws Exception{
 
-	*//*	DBCursor cursor = transactionCollection.find();
-		if( cursor.hasNext() )
-			DBObject obj = cursor.next();
+		ArrayList<Transaction> transactionsList = null;
 
+		try{
+			DBCursor cursor = transactionCollection.find().sort(new BasicDBObject().append("_id",-1)).skip(skip).limit(count);
+				while(cursor.hasNext()){
+					Transaction temp = new Transaction(cursor.next());
+					if(transactionsList == null)
+						transactionsList = new ArrayList<>();
+					transactionsList.add(temp);
 
-		BasicDBObject query = new BasicDBObject("barcode", barcode);
-		DBObject foundDocument = transactionCollection.findOne(query);
-		DebugScreen.getInstance().print("query: "+query.toString());
-		DebugScreen.getInstance().print("db: "+db.getName());
-		DebugScreen.getInstance().print("collection: "+transactionCollection.getName());
+				}
 
-
-		if(foundDocument != null){
-			System.out.println("FOUND Article: "+foundDocument.toString());
-			System.out.println("Start Converting Doc to Article");
-			Article foundArticle = new Article(foundDocument);
-			DebugScreen.getInstance().print("Converted Article Name:"+foundArticle.getName());
-			System.out.println("Finished Converting Doc to Article");
-
-			return foundArticle;
+		}catch(Exception msg){
+			throw new Exception(msg);
 		}
-		else{
-			throw new Exception("BARCODE not found");
-		}*//*
-		
+
+		return transactionsList;
 		
 	}
-	*/
-	
+
 	//DATABASE FUNCITONS ----------------------------------------------------
 
 

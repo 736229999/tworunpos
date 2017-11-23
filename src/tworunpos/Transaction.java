@@ -87,9 +87,9 @@ A Transaction represents a finilized sales process. That means items has beeen a
 		if(zReference != null )
 			mainDocument.put("zReference",zReference);
 		if(dateTimeAtStartTransaction != null )
-			mainDocument.put("dateTimeAtStartTransaction",dateTimeAtStartTransaction);
+			mainDocument.put("dateTimeAtStartTransaction",""+dateTimeAtStartTransaction);
 		if(dateTimeAtEndTransaction != null )
-			mainDocument.put("dateTimeAtEndTransaction",dateTimeAtEndTransaction);
+			mainDocument.put("dateTimeAtEndTransaction",""+dateTimeAtEndTransaction);
 		if(sumOfCartGross != null )
 			mainDocument.put("sumOfCartGross",sumOfCartGross);
 		if(sumOfCartNet != null )
