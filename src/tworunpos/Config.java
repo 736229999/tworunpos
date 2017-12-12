@@ -1,12 +1,14 @@
 package tworunpos;
 
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Scanner;
-
-import org.json.simple.*;
-import org.json.simple.parser.*;
 
 
 public class Config {
@@ -55,7 +57,7 @@ public class Config {
 	private String[] weighItems =  new String[10];
 	
 	
-	public Config() throws IOException{
+	public Config() throws IOException {
 		try {
 			// read the json file
 

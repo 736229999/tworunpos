@@ -334,7 +334,7 @@ public class Cart extends Observable {
 	public Double getSumOfCartNet(){
 		Double sum = 0.00D;
 		for (int i=0; i < articles.size(); i++)
-			sum = Double.sum( sum , articles.elementAt(i).getPriceNetTotal() );
+			sum = (Double) sum + articles.elementAt(i).getPriceNetTotal();
 		return sum;
 	}
 	

@@ -28,19 +28,18 @@
     	<prop name="mapCharacterSetDefault" value="false" type="String" />
 	</JposEntry>
 	<JposEntry logicalName="WN_TH180_USB">
-        <creation factoryClass="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterServiceInstanceFactory" serviceClass="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterDeviceAdapter"/>
-        <!-- serviceClass property is not read out by WNPOSPrinterServiceInstanceFactory; however, JPOS samples need it -->
-        <vendor name="Wincor Nixdorf" url="http://www.wincor-nixdorf.com"/>
-        <jpos category="POSPrinter" version="1.13"/>
-        <product description="TH180 one station thermal receipt printer (USB, under Windows via POSUSB.SYS)" url="http://www.wincor-nixdorf.com"/>
-
-        <!--Other non JavaPOS required property (mostly vendor properties and bus specific properties i.e. RS232 )-->
-        <prop name="deviceAdapter" value="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterDeviceAdapter"/> 
-		<prop name="dcalClass" type="String" value="com.wn.retail.jpos113.dcal.TH180CommDevice, PRT, USB"/>
-		<prop name="infoConnectionType" type="String" value="USB" />
-		<prop name="vendorID" type="String" value="0x0AA7" />
-		<prop name="productID" type="String" value="0x030B" />
-		<prop name="instanceNo" type="String" value="0" />
-        <prop name="readTimeout" type="String" value="5000"/>
-    </JposEntry>
+		<creation serviceClass="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterDeviceAdapter" factoryClass="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterServiceInstanceFactory"/>
+		<!-- serviceClass property is not read out by WNPOSPrinterServiceInstanceFactory; however, JPOS samples need it -->
+		<vendor url="http://www.wincor-nixdorf.com" name="Wincor Nixdorf"/>
+		<jpos version="1.13" category="POSPrinter"/>
+		<product url="http://www.wincor-nixdorf.com" description="TH180 one station thermal receipt printer (USB, under Windows via POSUSB.SYS)"/>
+		<!--Other non JavaPOS required property (mostly vendor properties and bus specific properties i.e. RS232 )-->
+		<prop name="deviceAdapter" value="com.wn.retail.jpos113.posprinter.th180.TH180POSPrinterDeviceAdapter"/>
+		<prop name="dcalClass" value="com.wn.retail.jpos113.dcal.TH180CommDevice, PRT, USB" type="String"/>
+		<prop name="infoConnectionType" value="USB" type="String"/>
+		<prop name="vendorID" value="0x0AA7" type="String"/>
+		<prop name="productID" value="0x030B" type="String"/>
+		<prop name="instanceNo" value="0" type="String"/>
+		<prop name="readTimeout" value="5000" type="String"/>
+	</JposEntry>
 </JposEntries>

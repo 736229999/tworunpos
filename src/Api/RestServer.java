@@ -13,7 +13,7 @@ public class RestServer extends Thread{
     private DebugScreen debugScreen = DebugScreen.getInstance();
 
     public void run() {
-        String baseUrl = "http://localhost:8080";
+        String baseUrl = "http://localhost:8090";
         ResourceConfig config = new ResourceConfig();
         config.registerClasses(HalloWeltService.class);
         config.registerClasses(ArticleResource.class);

@@ -74,7 +74,12 @@ A Transaction represents a finilized sales process. That means items has beeen a
 		return this;
 	}
 
-
+	/*
+	Looks for the current open Z-Session and will add a reference to it
+	 */
+	public void addToCurrentZSession(){
+		//todo
+	}
 
 	/*
 	 * This method will return the document object for a mongodb entry
