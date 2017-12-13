@@ -81,7 +81,7 @@ public class DatabaseClient extends MongoClient{
 					
 					
 				} catch (IOException e11) {
-					// TODO Auto-generated catch block
+
 					debug.print("Starting MongoDB failed!");
 					debug.printStackTrace(e11);
 					

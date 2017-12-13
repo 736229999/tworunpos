@@ -1,6 +1,6 @@
 package tworunpos;
 
-import Devices.JPosDeviceManager;
+import Devices.DeviceManager;
 import Devices.JPosPrinter;
 import Exceptions.CheckoutGeneralException;
 import Exceptions.CheckoutPaymentException;
@@ -462,7 +462,7 @@ public class Cart extends Observable {
 		//print receipt
 		JPosPrinter printer = null;
 		try {
-			printer = JPosDeviceManager.getInstance().getPrinter();
+			printer = DeviceManager.getInstance().getPrinter();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

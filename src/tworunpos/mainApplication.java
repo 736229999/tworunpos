@@ -2,9 +2,12 @@ package tworunpos;
 
 
 import Api.RestServer;
-import Devices.JPosDeviceManager;
+import Devices.DeviceManager;
 import GuiElements.TrSounds;
 import com.mongodb.DB;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class mainApplication {
@@ -18,7 +21,7 @@ public class mainApplication {
 	private static ArticleList articleList;
 	
 	//device manager to manage all pos specific hardware over JPos standard
-	public static JPosDeviceManager deviceManager;
+	public static DeviceManager deviceManager;
 
 	//RESTful Api to import data
 	public static RestServer api;
@@ -28,7 +31,8 @@ public class mainApplication {
 	
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
-	
+
+
 		
 
 		//SHUTDOWN Hook to clean up resources
@@ -39,7 +43,7 @@ public class mainApplication {
 		    	//close devices
 		    	System.out.println("close devices");
 		    	try {
-					JPosDeviceManager.getInstance().closeAllDevices();
+					DeviceManager.getInstance().closeAllDevices();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -93,7 +97,7 @@ public class mainApplication {
 		 */
 		splashScreen.setText("Starting Device Manager ...");
 		try {
-			deviceManager = JPosDeviceManager.getInstance();
+			deviceManager = DeviceManager.getInstance();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -143,5 +147,13 @@ public class mainApplication {
 		
 	}
 
-	
+    public static void close(){
+
+        System.exit(0);
+
+    }
+
+
+
+
 }

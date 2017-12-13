@@ -45,7 +45,7 @@ public class Config {
 	public Boolean debugMode = true;
 	
 	//The Path of the mongo extension to start, if not already existing
-	public String mongoDbLocation = "C:\\Program Files\\MongoDB\\Server\\3.4\\bin\\mongod.exe";
+	public String mongoDbLocation = "C:\\Program Files\\MongoDB\\Server\\3.2\\bin\\mongod.exe";
 	
 	//The currency Smybol to use for printouts etc
 	private String currencySmybol = "€";
