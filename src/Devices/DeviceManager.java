@@ -16,12 +16,7 @@ public class DeviceManager {
 	JLineDisplay lineDisplay = null;
 	ComScaleDialog06 scale = null;
 
-	private int ENQ = 5,
-			ACK = 6,
-			NAK = 15,
-			STX = 2,
-			ETX = 3,
-			EOT = 4;
+
 	
 	public DeviceManager() throws Exception {
 		//System.setProperty("jpos.config.populatorFile", "jpos.xml");
@@ -31,7 +26,7 @@ public class DeviceManager {
 		try
 		{
 			scale = new ComScaleDialog06("COM3");
-			scale.writeData( EOT,ENQ);
+			scale.writeDataTest();
 
 		}
 		catch ( Exception e )
