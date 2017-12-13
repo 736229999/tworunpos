@@ -9,7 +9,7 @@ public class ZSession {
 /*
  */
 
-	private String id;
+	private Integer counter;
 
 	private Date dateTimeAtStartSesstion;
 	private Date dateTimeAtEndSession;
@@ -31,10 +31,13 @@ public class ZSession {
 
 	public ZSession() {
 
+		//todo generate new empty session
+
 	}
 
 	public ZSession(DBObject transactionDbObject){
 
+		counter = (transactionDbObject.get("counter") != null ? (Integer) transactionDbObject.get("counter"):null);
 		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
 		dateTimeAtStartSesstion = (transactionDbObject.get("dateTimeAtStartSesstion") != null ? (Date) transactionDbObject.get("dateTimeAtStartSesstion"):null);
 		dateTimeAtEndSession =  (transactionDbObject.get("dateTimeAtEndSession") != null ?  (Date) ( transactionDbObject.get("dateTimeAtEndSession")) :null);
@@ -54,12 +57,12 @@ public class ZSession {
 	}
 
 
-	public String getId() {
-		return id;
+	public Integer getCounter() {
+		return counter;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setCounter(Integer counter) {
+		this.counter = counter;
 	}
 
 	public ZSession getZSession(){
@@ -75,7 +78,8 @@ public class ZSession {
 
 		//create basic transaction attributes
 		BasicDBObject mainDocument = new BasicDBObject();
-
+		if(counter != null )
+			mainDocument.put("counter",counter);
 		if(dateTimeAtStartSesstion != null )
 			mainDocument.put("dateTimeAtStartSesstion",dateTimeAtStartSesstion);
 		if(dateTimeAtEndSession != null )

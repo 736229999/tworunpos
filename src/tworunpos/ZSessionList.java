@@ -50,14 +50,19 @@ public class ZSessionList {
 	 */
 	public static  ZSession getCurrentZSession() throws Exception {
 		ZSession zSession = null;
-		DBCursor cursor = collection.find().sort(new BasicDBObject().append("_id",-1)).limit(1);
+
+
+		BasicDBObject searchObject = new BasicDBObject();
+		searchObject.put("dateTimeAtEndSession", "");
+		DBCursor cursor = collection.find(searchObject);
 
 		if(  cursor.one() != null  ){
+			zSession = new ZSession(cursor.one());
 			zSession = new ZSession(cursor.one());
 			DebugScreen.getInstance().print(zSession.getMyDocument().toString());
 		}
 		else{
-			throw new Exception("Z-Session not found");
+			throw new Exception("No open Z-Session available.");
 		}
 		return zSession;
 	}
