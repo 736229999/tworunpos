@@ -3,6 +3,7 @@ package GuiElements;
 import tworunpos.DatabaseClient;
 import  tworunpos.GuiElements;
 import tworunpos.User;
+import tworunpos.mainApplication;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,7 +32,8 @@ public class TrNumPadAction extends TrNumPad{
 	
 	
 	/*
-	 * 
+	 * Used for User login
+	 *
 	 * Params
 	 * 	JTextfield: textfield, the Numbad Values should be written into
 	 * 	textfieldFormat: 0: no format, 1: currency with 2 zeros
@@ -142,7 +144,11 @@ public class TrNumPadAction extends TrNumPad{
 		btnKeyPadPlus.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
+
+				//close applicaiton by hidden code
+				if(textFieldOne.getText().equals("1453"))
+					mainApplication.close();
+
 				User.getInstance().login( Integer.parseInt( textFieldOne.getText() ));
 			}
 		});

@@ -7,7 +7,7 @@ public class ArticleUnit {
 	final static String[] TYPE_NAMES_GERMAN = {"Stück", "Kilogramm"};
 	final static String[] TYPE_SHORTNAMES_GERMAN = {"Stck", "kg"};
 	
-	private int unit = 1;
+	private int unit = 0;
 	
 	
 

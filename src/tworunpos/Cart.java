@@ -1,25 +1,19 @@
 package tworunpos;
 
+import Devices.DeviceManager;
+import Devices.JPosPrinter;
+import Exceptions.CheckoutGeneralException;
+import Exceptions.CheckoutPaymentException;
+import Prints.Receipt;
+import com.mongodb.*;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Observable;
 import java.util.Vector;
-
-import javax.print.attribute.standard.DateTimeAtCreation;
-
-import Devices.JPosDeviceManager;
-import Exceptions.CheckoutGeneralException;
-import Exceptions.CheckoutPaymentException;
-import Prints.Receipt;
-
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 
 
 
@@ -28,7 +22,7 @@ public class Cart extends Observable {
 	// Eine (versteckte) Klassenvariable vom Typ der eigene Klasse
 	private static Cart instance = null;
 	
-	private Vector<CartArticle> cart = new Vector<CartArticle>(); 
+	private Vector<CartArticle> articles = new Vector<CartArticle>();
 	private DB db = DatabaseClient.getInstance().getConnectedDB();
 	private DBCollection transactionCollection;
 	
@@ -40,8 +34,12 @@ public class Cart extends Observable {
 	//vars to be filled to be able to checkout
 	private String paymentType;
 	private Double paymentGiven;
-	
-	
+	private String transactionType;
+	private Integer transactionZ;
+	private Double transactionAmountGross;
+	private Double 	transactionAmountNet;
+	private Integer cashierId;
+
 	//receipt to be printed out
 	private Receipt receipt = new Receipt();
 	
@@ -79,17 +77,41 @@ public class Cart extends Observable {
 		  }
 
 	}
-	
-	
+
+
+	public Cart(DBObject cartObject){
+
+		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
+		transactionZ = (cartObject.get("transactionZ") != null ? (Integer) cartObject.get("transactionZ"):null);
+		dateTimeAtStartTransaction =  (cartObject.get("dateTimeAtStartTransaction") != null ?  (Date) ( cartObject.get("dateTimeAtStartTransaction")) :null);
+		dateTimeAtEndTransaction = (cartObject.get("dateTimeAtEndTransaction") != null ?  (Date) cartObject.get("dateTimeAtEndTransaction") :null);
+		transactionType = (cartObject.get("transactionType") != null ?   cartObject.get("transactionType").toString() : null );
+		transactionAmountGross = (cartObject.get("transactionAmountGross") != null ?   (Double) cartObject.get("transactionAmountGross") : null );
+		transactionAmountNet =  (cartObject.get("transactionAmountNet") != null ? (Double) cartObject.get("transactionAmountNet"):null);
+		cashierId =  (cartObject.get("cashierId") != null ? (Integer) cartObject.get("cashierId"):null);
+
+		//create lines of transaction
+		BasicDBList articlesDBList = (BasicDBList) cartObject.get("transactionLines");
+		BasicDBObject[] articlesArray = articlesDBList.toArray(new BasicDBObject[0]);
+		for(BasicDBObject dbObj : articlesArray) {
+			// add each item from the articlesArray to articles List
+			CartArticle ca = new CartArticle(dbObj);
+			articles.add(ca);
+		}
+
+
+
+	}
+
 	public Cart(){
 		
 		dateTimeAtStartTransaction = new Date();
-		transactionCollection = db.getCollection("transactions");
+		transactionCollection = db.getCollection("transactionList");
 	}
 	
 
-	public Vector<CartArticle> getCart(){
-		return cart;
+	public Vector<CartArticle> getArticles(){
+		return articles;
 	}
 	
 	
@@ -180,7 +202,7 @@ public class Cart extends Observable {
 	public void addSimpleArticle(CartArticle article){
 		//SIMPLE ARTICLE INTO CART
 				//add this article to the cart vector
-				cart.add(article);
+				articles.add(article);
 				notifyObservers( new Object[]{"add", article} );			
 			
 
@@ -192,7 +214,7 @@ public class Cart extends Observable {
 						setChanged();
 						CartArticle depositArticle = ArticleList.lookupArticleByBarcode(article.getDepositBarcode()).toCartArticle();
 						System.out.println("deposite: "+depositArticle);
-						cart.add(depositArticle);
+						articles.add(depositArticle);
 						notifyObservers( new Object[]{"add", depositArticle} );
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -234,7 +256,7 @@ public class Cart extends Observable {
 		article.setPriceGross(-article.getPriceGross());
 		article.setPriceNet(-article.getPriceNet());
 		article.setIsRefund(true);
-		cart.add(article);
+		articles.add(article);
 		notifyObservers( new Object[]{"removeByArticleWithNotification", article}  );
 	}
 	
@@ -242,15 +264,15 @@ public class Cart extends Observable {
 	
 	public void removeArticlebyArticle(CartArticle article){
 		setChanged();
-		cart.remove(article);
+		articles.remove(article);
 		notifyObservers( new Object[]{"removeByArticle", article}  );
 	}
 
 	
 	public void removeArticlebyPosition(int position){
 		setChanged();
-		Article article = cart.get(position);
-		cart.remove(position);
+		Article article = articles.get(position);
+		articles.remove(position);
 		notifyObservers( new Object[]{"removeByPosition", position, article}  );
 
 		
@@ -258,11 +280,11 @@ public class Cart extends Observable {
 		//remove also related article (deposit)
 		if(article.hasDeposit()){
 			String articlesDepositBarcode = article.getDepositBarcode();
-			for(int i = position; i < cart.size(); i++){
-				Article tempDepositeArticle = cart.get(position);
+			for(int i = position; i < articles.size(); i++){
+				Article tempDepositeArticle = articles.get(position);
 				if(tempDepositeArticle.getBarcode().equals(articlesDepositBarcode)){
 					setChanged();
-					cart.remove(position);
+					articles.remove(position);
 					notifyObservers( new Object[]{"removeByPosition", position, tempDepositeArticle}  );
 
 				}
@@ -276,40 +298,43 @@ public class Cart extends Observable {
 	public void clear(){
 		removeAllArticles();
 	}
-	
+	public void drop(){
+		removeAllArticles();
+	}
+
 	public void removeAllArticles(){
 		setChanged();
-		cart.clear();
+		articles.clear();
 		notifyObservers( new Object[]{"removeAllArticles"}  );
 	}
 	
 	public CartArticle getArticleFromCart(int position){
 		
-		return  (CartArticle) cart.get(position);
+		return  (CartArticle) articles.get(position);
 	}
 	
 	
 	public void dublicateLastArticleInCart() throws Exception{
-		if(cart.size()<1)
+		if(articles.size()<1)
 			return;
 		
-		addArticle(cart.get(cart.size()-1), 1);			
+		addArticle(articles.get(articles.size()-1), 1);
 		
 	}
 	
-	public Float getSumOfCartGross(){
-		Float sum = 0.00F;
-		for (int i=0; i < cart.size(); i++)
-			sum = (float) (sum + cart.elementAt(i).getPriceGrossTotal());
+	public Double getSumOfCartGross(){
+		Double sum = 0.00D;
+		for (int i=0; i < articles.size(); i++)
+			sum = (Double) (sum + articles.elementAt(i).getPriceGrossTotal());
 		
-		return sum;
+		return  sum;
 	}
 	
 	
 	public Double getSumOfCartNet(){
 		Double sum = 0.00D;
-		for (int i=0; i < cart.size(); i++)
-			sum = Double.sum( sum , cart.elementAt(i).getPriceNetTotal() );
+		for (int i=0; i < articles.size(); i++)
+			sum = (Double) sum + articles.elementAt(i).getPriceNetTotal();
 		return sum;
 	}
 	
@@ -326,12 +351,12 @@ public class Cart extends Observable {
 		groupedTaxes = new ArrayList<GroupedTaxStruct>();
 
 		//iterate over cart to check all articles
-		for (int i=0; i < cart.size(); i++){
-			String name = cart.get(i).getVatPercentage()+"";
-			Double value =  cart.get(i).getVatPercentage();
-			Double vatAmount = cart.get(i).getVatAmountTotal();
-			Double netAmount = cart.get(i).getPriceNetTotal();
-			Double grossAmount = cart.get(i).getPriceGrossTotal();
+		for (int i=0; i < articles.size(); i++){
+			String name = articles.get(i).getVatPercentage()+"";
+			Double value =  articles.get(i).getVatPercentage();
+			Double vatAmount = articles.get(i).getVatAmountTotal();
+			Double netAmount = articles.get(i).getPriceNetTotal();
+			Double grossAmount = articles.get(i).getPriceGrossTotal();
 			char letterId = '\0';
 			
 			//group them
@@ -362,7 +387,7 @@ public class Cart extends Observable {
 			}
 	
 			//Since we are here and defined the letterId, we will write back the letterId back into CartArticle as well.
-			cart.get(i).setLetterIdOfTaxGroup(letterId);
+			articles.get(i).setLetterIdOfTaxGroup(letterId);
 			
 		}
 		DebugScreen.getInstance().print("End creating grouped taxes");
@@ -375,67 +400,87 @@ public class Cart extends Observable {
 	
 	
 	public void debug(){
-		System.out.println("Cartsize: "+cart.size());
+		System.out.println("Cartsize: "+articles.size());
 		
-		for(int i = 0; i < cart.size();i++){
-			System.out.println(i+": "+cart.elementAt(i).toString());
+		for(int i = 0; i < articles.size();i++){
+			System.out.println(i+": "+articles.elementAt(i).toString());
 		}
 		
 	}
-	
-	public Boolean finilize() throws CheckoutPaymentException,CheckoutGeneralException{
-		
+
+
+	/*
+	This method is the final checkout step! It will save the transaction to the database.
+	 */
+	public Boolean finilize() throws CheckoutPaymentException,CheckoutGeneralException {
+
 		//check if everthing is ok
-		
+
 		//check if articles are in the cart
-		if(cart.isEmpty()){
+		if (articles.isEmpty()) {
 			throw new CheckoutGeneralException("Bitte zuerst Artikel einscannen/eingeben!");
 		}
-		
-		
-		//check payment type
-		if(paymentType == null){
+
+
+		//check payment details
+		if (paymentType == null) {
 			throw new CheckoutPaymentException("Bitte eine Zahlungsart wählen!");
 		}
 
-		//check if amount is positive or not // if not it means we ahve to do a payout
-		if(this.getSumOfCartGross() <= 0){
-			
+		//check if amount is positive or not // if not it means we have to do a payout
+		if (this.getSumOfCartGross() <= 0) {
+
 		}
-		
-		if(this.getSumOfCartGross() > 0 && (paymentGiven == null || paymentGiven <= 0)){
+
+		if (this.getSumOfCartGross() > 0 && (paymentGiven == null || paymentGiven <= 0)) {
 			throw new CheckoutPaymentException("Bitte einen Zahlungsbetrag eingeben!");
 		}
-		
-		if(Helpers.roundForCurrency(paymentGiven) < Helpers.roundForCurrency(this.getSumOfCartGross())){
+
+		if (Helpers.roundForCurrency(paymentGiven) < Helpers.roundForCurrency(this.getSumOfCartGross())) {
 			throw new CheckoutPaymentException("Der Zahlbetrag ist nicht hoch genug!!");
 		}
-		
-		
-		
-		
-		dateTimeAtEndTransaction = new Date();
-		BasicDBObject transactionObject = getMyDocument();
-		transactionCollection.insert(transactionObject);
+
+		//prepare for receipt printout
 		this.createGroupedTaxes();
-		
-		//print receipt
 		DebugScreen.getInstance().clear();
 		DebugScreen.getInstance().print("Start Print Receipt");
-		receipt.setArticlesFromCart(this);
-		receipt.setTaxesFromCart(this);
+		receipt.setArticles(this);
+		receipt.setTaxes(this);
+
+		//save transaction in db
+		dateTimeAtEndTransaction = new Date();
+		Transaction transaction = new Transaction(this);
+		TransactionList transactionList = TransactionList.getInstance();
+		transactionList.addTransaction(transaction);
+
+		//BasicDBObject transactionObject = getMyDocument();
+		//transactionCollection.insert(transactionObject);
+
+
+
+
+		//print receipt
+		JPosPrinter printer = null;
 		try {
-			JPosDeviceManager.getInstance().getPrinter().print(receipt.toString());
+			printer = DeviceManager.getInstance().getPrinter();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+
+		if (printer != null) {
+			try {
+				printer.print(receipt.toString());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		DebugScreen.getInstance().print(receipt.toString());
 		DebugScreen.getInstance().print("End Print Receipt");
-		
+
 		return true;
-		
-		
+
+
 	}
 	
 	/*
@@ -444,30 +489,31 @@ public class Cart extends Observable {
 	public BasicDBObject getMyDocument(){
 		
 		//create basic transaction attributes
-		BasicDBObject mainDocument = new BasicDBObject();		
+		BasicDBObject mainDocument = new BasicDBObject();
+		mainDocument.put("transactionZ", 1); //todo bind to Z-Number
 		mainDocument.put("transaction", this.dateTimeAtStartTransaction);
 		mainDocument.put("transactionDateTimeAtStart", this.dateTimeAtStartTransaction);
 		mainDocument.put("transactionDateTimeAtEnd", this.dateTimeAtEndTransaction);
-		mainDocument.put("transactionType", "POS");
-		mainDocument.put("transactionPaymentType", paymentType);
+		mainDocument.put("transactionType", "POS"); //todo
 		mainDocument.put("transactionAmountGross", this.getSumOfCartGross());
 		mainDocument.put("transactionAmountNet", this.getSumOfCartNet());
-
-		mainDocument.put("cashierId", 1);
+		mainDocument.put("cashierId", 1); //todo program cashiers
 			
 		//create lines of transaction
 		BasicDBList  lines = new BasicDBList();	
-		for(int i = 0; i < cart.size();i++){
-			lines.add(cart.elementAt(i).getMyDocument() );
+		for(int i = 0; i < articles.size();i++){
+			lines.add(articles.elementAt(i).getMyDocument() );
 		}
 		mainDocument.put("transactionLines", lines);
 		
+/*
 		//payment info
 		BasicDBObject paymentInfo = new BasicDBObject();		
 		paymentInfo.put("paymentType", paymentType);
 		paymentInfo.put("paymentGiven", paymentGiven);
-		paymentInfo.put("paymentRest", 123);
+		paymentInfo.put("paymentRest", 123); //todo
 		mainDocument.put("paymentInfo", paymentInfo);
+*/
 
 		
 		return mainDocument;
@@ -504,8 +550,46 @@ public class Cart extends Observable {
 		
 		this.paymentGiven = oldVal;
 	}
-	
-	
+
+	public Receipt getReceipt() {
+		return receipt;
+	}
+
+	public Integer getCountOfReturnedArticles() {
+		Integer count = 0;
+		for (int i=0; i < articles.size(); i++){
+			if(articles.elementAt(i).isRefund())
+				count++;
+		}
+		return count;
+	}
+
+	public Double getSumOfReturnedArticlesInclTax() {
+		Double sum = 0.00;
+		for (int i=0; i < articles.size(); i++){
+			if(articles.elementAt(i).isRefund())
+				sum =+ articles.elementAt(i).getPriceGrossTotal();
+		}
+		return sum;
+	}
+
+	public Double getSumOfReturnedArticlesExclTax() {
+		Double sum = 0.00;
+		for (int i=0; i < articles.size(); i++){
+			if(articles.elementAt(i).isRefund())
+				sum =+ articles.elementAt(i).getPriceNetTotal();
+		}
+		return sum;
+	}
+
+	public Date getDateTimeAtStartTransaction() {
+		return dateTimeAtStartTransaction;
+	}
+
+	public Date getDateTimeAtEndTransaction() {
+		return dateTimeAtEndTransaction;
+	}
+
 	public void reset(){
 		removeAllArticles();
 		instance = null;

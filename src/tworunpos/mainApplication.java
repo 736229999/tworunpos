@@ -1,14 +1,13 @@
 package tworunpos;
 
 
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-
-import javax.swing.*;
-import Devices.*;
+import Api.RestServer;
+import Devices.DeviceManager;
 import GuiElements.TrSounds;
-
 import com.mongodb.DB;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class mainApplication {
@@ -22,14 +21,18 @@ public class mainApplication {
 	private static ArticleList articleList;
 	
 	//device manager to manage all pos specific hardware over JPos standard
-	public static JPosDeviceManager deviceManager;
-	
+	public static DeviceManager deviceManager;
+
+	//RESTful Api to import data
+	public static RestServer api;
+
 	//load config
 	private static Config config;
 	
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
-	
+
+
 		
 
 		//SHUTDOWN Hook to clean up resources
@@ -40,7 +43,7 @@ public class mainApplication {
 		    	//close devices
 		    	System.out.println("close devices");
 		    	try {
-					JPosDeviceManager.getInstance().closeAllDevices();
+					DeviceManager.getInstance().closeAllDevices();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -75,14 +78,26 @@ public class mainApplication {
 		 */
 		splashScreen.setText("Starting Debugscreen ...");
 		DebugScreen debug =  DebugScreen.getInstance();
-		
+
+
+		/*
+		 * Start the API
+		 */
+		try {
+			api = new RestServer();
+			api.run();
+		} catch (Exception e1) {
+
+			e1.printStackTrace();
+		}
+
 
 		/*
 		 * Start Devicemanager
 		 */
 		splashScreen.setText("Starting Device Manager ...");
 		try {
-			deviceManager = JPosDeviceManager.getInstance();
+			deviceManager = DeviceManager.getInstance();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -101,27 +116,26 @@ public class mainApplication {
 		/*
 		 * Create the article list connected to the db
 		 */
-		splashScreen.setText("Loading Artilcle List ...");
+		splashScreen.setText("Loading Article List ...");
 		articleList = new ArticleList();
 
+//
+//
+//		/*
+//		 * start fileWatcher for incoming updates  CSV
+//		 */
+//		splashScreen.setText("Starting Importer ...");
+//		try {
+//			//if(config.getImportFileType().equals(Config.importFileTypeDefault)){
+//				DataImporter = new DataImporterDefault("C:/tworunpos/import", true,  articleList,config);
+//			//}
+////			else if (config.getImportFileType().equals(Config.importFileTypeMyaSoft)){
+////				//DataImporter = new DataImporterMyasoft("/import", true, db, articleList,config);
+////			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
-		
-		/*
-		 * start fileWatcher for incoming updates  CSV
-		 */
-		splashScreen.setText("Starting Importer ...");
-		try {
-			//if(config.getImportFileType().equals(Config.importFileTypeDefault)){
-				DataImporter = new DataImporterDefault("C:/tworunpos/import", true,  articleList,config);
-			//}
-//			else if (config.getImportFileType().equals(Config.importFileTypeMyaSoft)){
-//				//DataImporter = new DataImporterMyasoft("/import", true, db, articleList,config);
-//			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	    
 
 		/*
 		 * start the mainapplication 
@@ -133,5 +147,13 @@ public class mainApplication {
 		
 	}
 
-	
+    public static void close(){
+
+        System.exit(0);
+
+    }
+
+
+
+
 }

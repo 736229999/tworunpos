@@ -1,10 +1,9 @@
 package Devices;
 
-import tworunpos.Cart;
+import Prints.Receipt;
 import jpos.JposException;
 import jpos.POSPrinter;
 import jpos.POSPrinterConst;
-import Prints.Receipt;
 
 public class JPosPrinter extends JPosDevice implements JPosDeviceInterface {
 

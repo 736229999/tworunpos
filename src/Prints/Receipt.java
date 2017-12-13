@@ -1,14 +1,13 @@
 package Prints;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Vector;
-
 import tworunpos.Cart;
 import tworunpos.CartArticle;
 import tworunpos.Config;
 import tworunpos.Helpers;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Vector;
 
 
 
@@ -286,10 +285,10 @@ public class Receipt implements Print {
 
 	}
 	
-	public void setArticlesFromCart(Cart cart){
+	public void setArticles(Cart cart){
 		addNewEmptyLineToBody();
-		for(int i = 0; i < cart.getCart().size();i++){
-			addNewArticleLine(cart.getCart().get(i));
+		for(int i = 0; i < cart.getArticles().size(); i++){
+			addNewArticleLine(cart.getArticles().get(i));
 		}
 		
 		
@@ -447,7 +446,7 @@ public class Receipt implements Print {
 	}
 	
 	
-	public void setTaxesFromCart(Cart cart){
+	public void setTaxes(Cart cart){
 		taxes ="";
 		Double vatTotalSum = 0.00D;
 		Double netTotalSum = 0.00D;

@@ -7,10 +7,10 @@ public class Article {
 
 	private String barcode;
 	private Integer plu;
-	private String name;
+	private String name ;
 	private ArticleUnit unit;
 	private Double priceGross;
-	private Double priceNet;
+	private Double priceNet ;
 	private Double vatPercentage;
 	private Double vatAmount;
 	private Boolean isDeposit;
@@ -18,8 +18,8 @@ public class Article {
 	private String depositBarcode;
 	
 	
-	
-	public Article(){		
+
+	public Article(){
 	}
 	
 	public Article(DBObject articleDbObject){		
@@ -45,19 +45,22 @@ public class Article {
 	}
 	
 	
-	public Article(String barcode, String name, ArticleUnit unit, Double priceGross ){
+	public Article(String barcode, String name, ArticleUnit unit, Double priceGross, Double vatPercentage ){
 		setBarcode(barcode);
 		setName(name);
 		setUnit(unit);
 		setPriceGross(priceGross);
-		
+		setVatPercentage(vatPercentage);
+		Double priceNet = priceGross/(1+(vatPercentage/100));
+		setPriceNet(priceNet);
+		setVatAmount(priceGross-priceNet);
 	}
 	
-	public Article getArticel(){
+	public Article getArticle(){
 		return this;
 	}
 	
-	public int getPlu() {
+	public Integer getPlu() {
 		return plu;
 	}
 	public void setPlu(int plu) {
@@ -169,18 +172,29 @@ public class Article {
 	 */
 	public BasicDBObject getMyDocument(){
 		
-		BasicDBObject document = new BasicDBObject();		
-		document.put("barcode", this.getBarcode());
-		document.put("plu", this.getPlu());
-		document.put("name", this.getName());
-		document.put("unit", this.getUnit().getUnit());
-		document.put("priceGross", this.getPriceGross());
-		document.put("priceNet", this.getPriceNet());
-		document.put("VatPercentage", this.getVatPercentage());
-		document.put("VatAmount", this.getVatAmount());
-		document.put("isDeposit", this.getIsDeposit());
-		document.put("hasDeposit", this.getHasDeposit());
-		document.put("depositBarcode", this.getDepositBarcode());
+		BasicDBObject document = new BasicDBObject();
+		if(!this.getBarcode().isEmpty())
+			document.put("barcode", this.getBarcode());
+		if(this.getPlu()!= null )
+			document.put("plu", this.getPlu());
+		if(!this.getName().isEmpty())
+			document.put("name", this.getName());
+		if(this.getUnit() != null)
+			document.put("unit", this.getUnit().getUnit());
+		if(this.getPriceGross()  != null)
+			document.put("priceGross", this.getPriceGross());
+		if(this.getPriceNet() != null)
+			document.put("priceNet", this.getPriceNet());
+		if(this.getVatPercentage() != null)
+			document.put("VatPercentage", this.getVatPercentage());
+		if(this.getVatAmount()  != null)
+			document.put("VatAmount", this.getVatAmount());
+		if(this.getIsDeposit() != null)
+			document.put("isDeposit", this.getIsDeposit());
+		if(this.getHasDeposit() != null)
+			document.put("hasDeposit", this.getHasDeposit());
+		if(this.getDepositBarcode() != null)
+			document.put("depositBarcode", this.getDepositBarcode());
 		
 		return document;
 	}
@@ -190,11 +204,15 @@ public class Article {
 		CartArticle cartArticle = new CartArticle();
 		
 		cartArticle.setBarcode(barcode);
-		cartArticle.setDepositBarcode(depositBarcode);
-		cartArticle.setHasDeposit(hasDeposit);
-		cartArticle.setIsDeposit(isDeposit);
+		if(depositBarcode != null)
+			cartArticle.setDepositBarcode(depositBarcode);
+		if(hasDeposit != null)
+			cartArticle.setHasDeposit(hasDeposit);
+		if(isDeposit != null)
+			cartArticle.setIsDeposit(isDeposit);
 		cartArticle.setName(name);
-		cartArticle.setPlu(plu);
+		if(plu != null)
+			cartArticle.setPlu(plu);
 		cartArticle.setPriceGross(priceGross);
 		cartArticle.setPriceNet(priceNet);
 		cartArticle.setUnit(unit);
