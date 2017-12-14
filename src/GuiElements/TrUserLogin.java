@@ -1,6 +1,7 @@
 package GuiElements;
 
 import  tworunpos.GuiElements;
+import tworunpos.LoginEventListener;
 import tworunpos.User;
 import tworunpos.tworunPos;
 
@@ -37,6 +38,8 @@ public class TrUserLogin extends JFrame {
 	
 	static final int loginMaskHeight = 500;
 	static final int loginMaskWidth = 300;
+
+	private TrNumPadAction numPad;
 	
 	JTextField textfield;
 	
@@ -50,9 +53,9 @@ public class TrUserLogin extends JFrame {
 	 */
 	public TrUserLogin() {
 
-		JPanel generalPanel =  new JPanel(); //PREFERRED!
+		JPanel generalPanel =  new JPanel();
 		generalPanel.setLayout(new BoxLayout(generalPanel, BoxLayout.Y_AXIS));
-		JPanel loginPanel =  new JPanel(new BorderLayout()); //PREFERRED!
+		JPanel loginPanel =  new JPanel(new BorderLayout());
 		
 		
 		textfield = new JTextField();
@@ -60,8 +63,9 @@ public class TrUserLogin extends JFrame {
 		Font font1 = new Font("SansSerif", Font.BOLD, 20);
 		textfield.setFont(font1);
 		textfield.setPreferredSize(new Dimension(loginMaskWidth, 60));
-		TrNumPadAction numPad = new TrNumPadAction(textfield);
-		
+		numPad = new TrNumPadAction(textfield);
+
+
 		loginPanel.setPreferredSize(new Dimension(loginMaskWidth,loginMaskHeight));
 		loginPanel.add(textfield,BorderLayout.NORTH);
 		loginPanel.add(numPad,BorderLayout.CENTER);
@@ -88,6 +92,15 @@ public class TrUserLogin extends JFrame {
 	 */
 	public void clearInput(){
 		textfield.setText("");
+	}
+
+
+	public Integer getInputValue(){
+		return   Integer.parseInt( textfield.getText());
+	}
+
+	public void addListener(LoginEventListener toAdd) {
+		numPad.addListener(toAdd);
 	}
 	
 	

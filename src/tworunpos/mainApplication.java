@@ -45,7 +45,6 @@ public class mainApplication {
 		    	try {
 					DeviceManager.getInstance().closeAllDevices();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 		    	
@@ -135,6 +134,7 @@ public class mainApplication {
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}
+
 
 
 		/*

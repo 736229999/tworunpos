@@ -6,9 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -44,22 +42,16 @@ import javax.swing.table.TableModel;
 import javax.swing.JScrollPane;
 import javax.swing.border.LineBorder;
 
+import Exceptions.CounterException;
+import Exceptions.ZSessionException;
 import org.apache.commons.lang.ArrayUtils;
 
 import Exceptions.CheckoutGeneralException;
 import Exceptions.CheckoutPaymentException;
-import GuiElements.DigitalClock;
-import GuiElements.TrActionsForSaleNumPad;
-import GuiElements.TrButtonDefault;
-import GuiElements.TrDialogYesNo;
-import GuiElements.TrDimensions;
-import GuiElements.TrDisplay;
-import GuiElements.TrDisplayForCashier;
-import GuiElements.TrNumPadCurrency;
-import GuiElements.TrNumPadSaleScreen;
-import GuiElements.TrToggleButton;
+import GuiElements.*;
 
 import com.mongodb.DB;
+import sun.security.ssl.Debug;
 
 public class tworunPos extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -69,7 +61,7 @@ public class tworunPos extends JFrame {
 	private JFormattedTextField textfieldOne;
 
 
-	
+	private String frameTitle;
 	
 	private JPanel displayPanel;
 	private TrDisplay display;
@@ -88,7 +80,13 @@ public class tworunPos extends JFrame {
 	private JTable table;
 
 
+	TrUserLogin loginmask;
 
+
+
+
+	private User salesUser = null;
+	private ZSession openZSession = null;
 	private Cart cart = null;
 			
 	private JPanel mainPanel;
@@ -102,6 +100,7 @@ public class tworunPos extends JFrame {
 	//State
 	PosState state = PosState.getInstance();
 
+
 	
 	
 	
@@ -114,25 +113,50 @@ public class tworunPos extends JFrame {
 	private DataFileImporter myDataImporter;
 	private Config config;
 	private DebugScreen debug;
-	
+
+	private ZSessionList zSessionList;
+
+
+
+	private List<LoginEventListener> listeners = new ArrayList<LoginEventListener>();
+	public void addListener(LoginEventListener toAdd) {
+		listeners.add(toAdd);
+	}
 
 	public tworunPos(String frameTitle, DB db, DataFileImporter importer, ArticleList articleList, Config config, DebugScreen debug)  {
 
+		this.frameTitle = frameTitle;
 		this.db = db;
 		this.myDataImporter = importer;
 		this.config = config;
 		this.debug = DebugScreen.getInstance();
+
+		state.addObserver(new stateObserver());
+
+		//----------------- LOGIN
+		this.salesUser = new User();
+		//start the loginmask to login; this method will stop the process here, until user logs in
+		state.changeStateToLogin(false);
+
+
+
+        while(!salesUser.loggedIn()){};
+
+		//------------------ZSession
+		//initZSession();
+
+		setTitle(frameTitle);
+		createMainGui();
+		initWindow();
+
+
+
+		//close the loginscreen and continue with sale screen
+		//loginmask.setVisible(false); //you can't see me!
+		//loginmask.dispose(); //Destroy the JFrame object
+
 		
-		
-		//handle user login first
-//		User.getInstance();
-		while(!User.getInstance().loggedIn()){}	
-		
-		
-		
-		this.setTitle(frameTitle);
-		this.createMainGui();	
-		this.initWindow();
+
 	
 		
 		//listen to all keystrokes for commands e.g. barcodes from scanner
@@ -194,15 +218,50 @@ public class tworunPos extends JFrame {
 		
 		
 //		state.changeState(PosState.posStateReady);
-		changeStateToReady();
+		state.changeStateToReady(true);
 		
 		
-		//observe some elements
-		state.addObserver(new stateObserver());
+
+
 		
 		
 	}
 
+	private void initZSession(){
+
+		zSessionList = new ZSessionList();
+		try {
+			openZSession = zSessionList.getOpenZSession();
+			GuiElements.displayInfoMessageBox("Z-No: "+openZSession.getCounter());
+		} catch (ZSessionException e) {
+			GuiElements.displayInfoMessageBox("Z-Fehler: "+e.getMessage());
+
+			e.printStackTrace();
+		} catch (CounterException e) {
+
+			GuiElements.displayInfoMessageBox("Counter-Fehler: "+e.getMessage());
+			e.printStackTrace();
+		}
+
+	}
+
+		private class LoginObserver implements LoginEventListener {
+			@Override
+			public void update(String action) {
+
+				if(action == "login"){
+					salesUser.login(loginmask.getInputValue());
+					initZSession();
+                    //close the loginscreen and continue with sale screen
+                    loginmask.setVisible(false); //you can't see me!
+                    loginmask.dispose(); //Destroy the JFrame object
+					state.changeStateToReady(true);
+                }
+				else if(action == "logout"){
+
+				}
+			}
+		}
 
 
 	    private class cartObserver implements Observer {
@@ -218,7 +277,7 @@ public class tworunPos extends JFrame {
 					//füge article der artikelliste der hauptanwendung hinzu
 					addArticleToTable((CartArticle)args[1]);
 					display.showArticleOnDisplayForSale(((CartArticle)args[1]).getQuantity(),(CartArticle)args[1],cart);
-					PosState.getInstance().changeStateToSellingProcess(false);
+					state.changeStateToSellingProcess(false);
 					
 				}else if(args[0] == "removeByArticleWithNotification"){
 					//f�ge artikel als "minusartikel" in die liste hinzu
@@ -237,7 +296,7 @@ public class tworunPos extends JFrame {
 			
 					removeArticleFromTableByPosition(position);
 					display.showArticleOnDisplayForCancellation(1,article,cart);
-					PosState.getInstance().changeStateToSellingProcess(false);
+					state.changeStateToSellingProcess(false);
 					
 				}else if(args[0] == "drop"){
 					
@@ -245,8 +304,6 @@ public class tworunPos extends JFrame {
 				}
 			}
 	    }
-
-
 	    private class stateObserver implements Observer {
 
 			@Override
@@ -270,6 +327,10 @@ public class tworunPos extends JFrame {
 					}
 				}else if(args[0] == "changePosState" && (int)args[1] == PosState.posStateSettings ){
 					changeStateToSettings();
+				}else if(args[0] == "changePosState" && (int)args[1] == PosState.posStateLogin ){
+					DebugScreen.getInstance().print("changeStateToLogin");
+					changeStateToLogin(true);
+					//todo wait on loginscreen until login done
 				}
 			}
 	    }
@@ -309,7 +370,7 @@ public class tworunPos extends JFrame {
 	protected void createMainGui() {
 		getContentPane().setLayout(new BorderLayout());
 
-		
+
 		// MAIN PANEL
 		mainPanel = new JPanel();
 		mainPanel.setBackground(Color.white);
@@ -372,8 +433,8 @@ public class tworunPos extends JFrame {
 		statusbar.setSize(statusBarDimension);
 		statusbar.setPreferredSize(statusBarDimension);
 		
-		statusbar.add(new JLabel("Kassennr."));
-		statusbar.add(new JLabel("Kassierername"));
+		statusbar.add(new JLabel("Z: "+openZSession.getCounter()));
+		statusbar.add(new JLabel("Kassennummer Kassierername"));
 		statusbar.add(new JLabel("Online-Status"));
 
 		mainPanel.add(statusbar, BorderLayout.SOUTH);
@@ -724,7 +785,17 @@ public class tworunPos extends JFrame {
 		panelHolder[0][1].add(btnSettings_zreport);
 		btnSettings_zreport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
+				//todo printout Z-report
+
+				//Close the Z-Session
+				ZSessionList zSessionList = new ZSessionList();
+				try {
+					zSessionList.closeOpenZSession();
+					openZSession = null;
+				} catch (ZSessionException e) {
+					new TrDialogYesNo(e.getMessage(),"Fehler");
+					e.printStackTrace();
+				}
 			}
 		});
 		
@@ -745,8 +816,13 @@ public class tworunPos extends JFrame {
 		btnSettings_changeUser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					User.getInstance().logout();
-					state.changeState(PosState.posStateReady);	
+
+					state.changeState(PosState.posStateLogin);
+
+					// Notify everybody that may be interested.
+					for (LoginEventListener hl : listeners)
+						hl.update("logout" );
+
 				} catch (Exception e) {
 					//e.printStackTrace();
 					GuiElements.displayInfoMessageBox(e.getMessage());
@@ -892,13 +968,13 @@ public class tworunPos extends JFrame {
 	
 	
 	private void buttonActionSettingsClicked(){
-		state.changeState(PosState.posStateSettings);
+		state.changeStateToSettings(false);
 	}
 	
 	
 	
 	private void buttonActionCheckoutClicked(){
-		state.changeState(PosState.posStateCheckout);
+		state.changeStateToCheckout(false);
 	}
 	
 	
@@ -928,7 +1004,7 @@ public class tworunPos extends JFrame {
 	public void changeStateToReady(){
 
 		//debug
-		DebugScreen.getInstance().print("textfieldOne: "+textfieldOne.getText());
+		//DebugScreen.getInstance().print("textfieldOne: "+textfieldOne.getText());
 
 		//clean the cart object
 		createCart();
@@ -1039,13 +1115,55 @@ public class tworunPos extends JFrame {
 		
 		display.clearDisplay();
 		display.showSimpleTextOnDisplay("Option auswählen!");
-//		textfieldOne.requestFocus();
 		initRightBarSettings();
 	}
-	
-	
 
 
-	
-	
+	/*
+	 * This method is mostly used to gdo login logout operations
+	 */
+	private void changeStateToLogin(boolean clearDisplay)  {
+
+		DebugScreen.getInstance().print("Login/Logout");
+
+		if(clearDisplay == true){
+			TrDisplayForCashier.getInstance().clearDisplay();
+			//showSimpleTextOnDisplay("");
+		}
+
+		//clear the barcode buffer
+		barcodeBuffer = "";
+		Buffer.getInstance().resetPosQuantityBuffer();
+
+
+		initRightBarDefault();
+
+		//logout operation
+		try {
+
+			if(salesUser!=null)
+				salesUser.logout();
+
+			loginmask = new TrUserLogin();
+			//register observer for login input
+
+			LoginObserver lo = new LoginObserver();
+			loginmask.addListener(lo);
+			//enable login screen
+			//User logged in?
+
+
+		} catch (Exception e) {
+			GuiElements.displayErrorMessageBox("Logout nicht möglich.");
+			DebugScreen.getInstance().print(e.getMessage());
+		}
+
+	}
+
+
+
+
+
+
+
 }
