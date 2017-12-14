@@ -1,5 +1,8 @@
 package tworunpos;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
 import java.util.Observer;
 
 import com.mongodb.BasicDBObject;
@@ -10,7 +13,7 @@ import GuiElements.TrDialogYesNo;
 import GuiElements.TrUserLogin;
 import GuiElements.TrSounds;
 
-public class User{
+public class User  {
 	
 	private String name;
 	private String userId;
@@ -22,41 +25,50 @@ public class User{
 	private String defaultUserId = "123";
 	private String defaultUserPassword = "123";
 
-	
-	TrUserLogin loginmask;
-	
-	private static User instance;
+
+
+
+
+
 	// Verhindere die Erzeugung des Objektes �ber andere Methoden
 	
 	public User(){
+
+
+	    //todo move defaultuserthing to UserList
 		//check if there is the default user in the database. if not create a default user
 		UserList userList = new UserList();		
 		try {
 			User defaultUser = userList.lookupUserById(defaultUserId);
+			DebugScreen.getInstance().print("Default User found.");
 		} catch (Exception e) {
 
 			userList.addUser(new User(defaultUserName, defaultUserId, defaultUserPassword));
-			DebugScreen.getInstance().print("Defaultuser angelegt!");
+			DebugScreen.getInstance().print("Default User created!");
 		}
-		
-		//start the loginmask to login
-		loginmask = new TrUserLogin();
 	}
-	// Eine Zugriffsmethode auf Klassenebene, welches dir '''einmal''' ein konkretes 
-	// Objekt erzeugt und dieses zur�ckliefert.
-	// Durch 'synchronized' wird sichergestellt dass diese Methode nur von einem Thread 
-	// zu einer Zeit durchlaufen wird. Der n�chste Thread erh�lt immer eine komplett 
-	// initialisierte Instanz.
-	
-	
 
-	//Singleton get Instantce
-		public static synchronized User getInstance () {
-			if (User.instance == null) {
-				User.instance = new User ();
-			}
-			return User.instance;
+
+	public User(Integer userKey){
+		//check if there is the default user in the database. if not create a default user
+		UserList userList = new UserList();
+		try {
+			User tmpUser = userList.lookupUserById(userKey.toString());
+			//map onject to this
+			this.name = tmpUser.name;
+			this.userId = tmpUser.userId;
+			this.password = tmpUser.password;
+			DebugScreen.getInstance().print("User login Successful by ID: "+userKey);
+
+		} catch (Exception e) {
+
+			DebugScreen.getInstance().print("Login failed.");
 		}
+
+
+
+
+	}
 	
 	
 	public User(String setName, String setUserId, String setPassword){
@@ -71,21 +83,22 @@ public class User{
 	}
 	
 	public  void logout() throws Exception{
-		
-		//check if logout is allowed
-		DebugScreen.getInstance().print("State before logout: "+PosState.getInstance().getState());
-		if(PosState.getInstance().logoutLocked()){
-			throw new Exception("Logout nicht möglich");
-		}
-		
-		//check if the user wants really to logout?
-		TrDialogYesNo yesNo = new TrDialogYesNo("Wirklich ausloggen?", "Sicherheitsabfrage");
-		if(yesNo.isYes()){
-			setLoggedInStatus(false);
-			instance = new User();
-		}
-		
 
+	    if(loggedIn()){
+            //check if logout is allowed
+            DebugScreen.getInstance().print("State before logout: "+PosState.getInstance().getState());
+            if( PosState.getInstance().logoutLocked()){
+                throw new Exception("Logout nicht möglich");
+            }
+
+            //check if the user wants really to logout?
+            TrDialogYesNo yesNo = new TrDialogYesNo("Wirklich ausloggen?", "Sicherheitsabfrage");
+            if(yesNo.isYes()){
+                setLoggedInStatus(false);
+
+
+            }
+        }
 
 	}
 	
@@ -93,22 +106,22 @@ public class User{
 		//todo real check for login
 		UserList userList = new UserList();
 		try {
-			User loginUser = userList.lookupUserById(entry.toString());
-			
-			instance = loginUser;
-			instance.setLoggedInStatus(true);
-			
-			loginmask.setVisible(false); //you can't see me!
-			loginmask.dispose(); //Destroy the JFrame object
+			userList.lookupUserById(entry.toString());
+			setLoggedInStatus(true);
+
+			//notifyObservers( new Object[]{"login", article} );
+
+
 			DebugScreen.getInstance().print("Login für "+entry.toString()+" erfolgreich!");
-			DebugScreen.getInstance().print("Username: "+instance.getName()+"\nLoginStatus: "+instance.getLoggedInStatus());
-	
-			
+
+
+
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			setLoggedInStatus(false);
-			loginmask.clearInput();
-			TrSounds.fail();
+			PosState.getInstance().changeStateToLogin(false);
+
 			DebugScreen.getInstance().print("Login für "+entry.toString()+" nicht erfolgreich!");
 		}
 		
@@ -165,6 +178,11 @@ public class User{
 		
 		return document;
 	}
+
+
+
+
+
 	
 
 }

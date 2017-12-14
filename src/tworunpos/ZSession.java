@@ -1,5 +1,7 @@
 package tworunpos;
 
+import Exceptions.CounterException;
+import Exceptions.ZSessionException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -11,9 +13,10 @@ public class ZSession {
 
 	private Integer counter;
 
-	private Date dateTimeAtStartSesstion;
+	private Date dateTimeAtStartSession;
 	private Date dateTimeAtEndSession;
-	private User sesssionStartedByUserId;
+	private User sesssionOpenedByUserId;
+    private User sesssionClosedByUserId;
 	private Double sumOfSessionGross;
 	private Double sumOfSessionNet;
 	private Double sumOfSessionTax;
@@ -29,19 +32,29 @@ public class ZSession {
 	private Double sumOfDepositArticlesExclTax;
 
 
-	public ZSession() {
+	public ZSession() throws CounterException {
 
-		//todo generate new empty session
+        dateTimeAtStartSession = new Date();
+		 counter = new Counter(this.getClass().getSimpleName()).getCounter();
 
 	}
+
+	public void close() throws ZSessionException {
+	    //todo do all calcucaltions
+
+        dateTimeAtEndSession = new Date();
+        save();
+
+    };
 
 	public ZSession(DBObject transactionDbObject){
 
 		counter = (transactionDbObject.get("counter") != null ? (Integer) transactionDbObject.get("counter"):null);
 		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
-		dateTimeAtStartSesstion = (transactionDbObject.get("dateTimeAtStartSesstion") != null ? (Date) transactionDbObject.get("dateTimeAtStartSesstion"):null);
+        dateTimeAtStartSession = (transactionDbObject.get("dateTimeAtStartSession") != null ? (Date) transactionDbObject.get("dateTimeAtStartSession"):null);
 		dateTimeAtEndSession =  (transactionDbObject.get("dateTimeAtEndSession") != null ?  (Date) ( transactionDbObject.get("dateTimeAtEndSession")) :null);
-		sesssionStartedByUserId = (transactionDbObject.get("sesssionStartedByUserId") != null ?  (User) transactionDbObject.get("sesssionStartedByUserId") :null);
+        sesssionOpenedByUserId = (transactionDbObject.get("sesssionOpenedByUserId") != null ?  (User) transactionDbObject.get("sesssionOpenedByUserId") :null);
+        sesssionClosedByUserId = (transactionDbObject.get("sesssionClosedByUserId") != null ?  (User) transactionDbObject.get("sesssionClosedByUserId") :null);
 		sumOfSessionGross = (transactionDbObject.get("sumOfSessionGross") != null ?   (Double) transactionDbObject.get("sumOfSessionGross") : null );
 		sumOfSessionNet = (transactionDbObject.get("sumOfSessionNet") != null ?   (Double) transactionDbObject.get("sumOfSessionNet") : null );
 		sumOfSessionTax =  (transactionDbObject.get("sumOfSessionTax") != null ? (Double) transactionDbObject.get("sumOfSessionTax"):null);
@@ -60,10 +73,12 @@ public class ZSession {
 	public Integer getCounter() {
 		return counter;
 	}
+    public static void incrementCounter() throws CounterException {
+        new Counter(ZSession.class.getSimpleName()).increment();
+    }
 
-	public void setCounter(Integer counter) {
-		this.counter = counter;
-	}
+
+
 
 	public ZSession getZSession(){
 		return this;
@@ -80,12 +95,14 @@ public class ZSession {
 		BasicDBObject mainDocument = new BasicDBObject();
 		if(counter != null )
 			mainDocument.put("counter",counter);
-		if(dateTimeAtStartSesstion != null )
-			mainDocument.put("dateTimeAtStartSesstion",dateTimeAtStartSesstion);
+		if(dateTimeAtStartSession != null )
+			mainDocument.put("dateTimeAtStartSession",dateTimeAtStartSession);
 		if(dateTimeAtEndSession != null )
-			mainDocument.put("dateTimeAtEndSession",""+dateTimeAtEndSession);
-		if(sesssionStartedByUserId != null )
-			mainDocument.put("sesssionStartedByUserId",""+sesssionStartedByUserId);
+			mainDocument.put("dateTimeAtEndSession",dateTimeAtEndSession);
+		if(sesssionOpenedByUserId != null )
+			mainDocument.put("sesssionOpenedByUserId",""+sesssionOpenedByUserId);
+        if(sesssionClosedByUserId != null )
+            mainDocument.put("sesssionClosedByUserId",""+sesssionClosedByUserId);
 		if(sumOfSessionGross != null )
 			mainDocument.put("sumOfSessionGross",sumOfSessionGross);
 		if(sumOfSessionNet != null )
@@ -111,6 +128,11 @@ public class ZSession {
 	}
 	
 
+	public void save() throws ZSessionException {
+	    //save this Object in DB
+	    ZSessionList zList = new ZSessionList();
+        zList.upsert(this);
+    }
 	
 	
 	

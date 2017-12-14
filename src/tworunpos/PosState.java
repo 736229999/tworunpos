@@ -34,6 +34,7 @@ public class PosState  extends Observable{
 	public final static int posStateSettings = 4;
 	public final static int posStateRefundDeposit = 5;
 	public final static int posStateRefund = 6;
+	public final static int posStateLogin = 7;
   	  
 
 	
@@ -45,6 +46,7 @@ public class PosState  extends Observable{
 	public boolean logoutLocked(){
 		boolean lock = false;
 		switch(posStateBefore){
+			case posStateLogin:;
 			case posStateBoot:;
 			case posStateSellingProcess:;
 			case posStateRefundDeposit:;
@@ -77,8 +79,53 @@ public class PosState  extends Observable{
 		notifyObservers( new Object[]{"changePosState",this.posStateSellingProcess,clearScreen});
 		
 	}
-	
-	
+
+	public void changeStateToLogin(boolean clearScreen){
+		setChanged();
+		posStateBefore = posState;
+		posState = this.posStateLogin;
+
+		DebugScreen.getInstance().print("PosStatus setted from "+posStateBefore+" to "+posState);
+
+		notifyObservers( new Object[]{"changePosState",this.posStateLogin,clearScreen});
+
+	}
+
+	public void changeStateToReady(boolean clearScreen){
+		setChanged();
+		posStateBefore = posState;
+		posState = this.posStateReady;
+
+		DebugScreen.getInstance().print("PosStatus setted from "+posStateBefore+" to "+posState);
+
+		notifyObservers( new Object[]{"changePosState",this.posStateReady,clearScreen});
+
+	}
+
+
+    public void changeStateToSettings(boolean clearScreen){
+        setChanged();
+        posStateBefore = posState;
+        posState = this.posStateSettings;
+
+        DebugScreen.getInstance().print("PosStatus setted from "+posStateBefore+" to "+posState);
+
+        notifyObservers( new Object[]{"changePosState",this.posStateSettings,clearScreen});
+
+    }
+
+
+    public void changeStateToCheckout(boolean clearScreen){
+        setChanged();
+        posStateBefore = posState;
+        posState = this.posStateCheckout;
+
+        DebugScreen.getInstance().print("PosStatus setted from "+posStateBefore+" to "+posState);
+
+        notifyObservers( new Object[]{"changePosState",this.posStateCheckout,clearScreen});
+
+    }
+
 	//Singleton get Instantce
 	public static synchronized PosState getInstance () {
 		if (PosState.instance == null) {

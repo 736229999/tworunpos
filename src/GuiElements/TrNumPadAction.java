@@ -1,10 +1,6 @@
 package GuiElements;
 
-import tworunpos.DatabaseClient;
-import  tworunpos.GuiElements;
-import tworunpos.User;
-import tworunpos.mainApplication;
-
+import tworunpos.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -14,6 +10,8 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 import javax.swing.BorderFactory;
@@ -29,8 +27,15 @@ public class TrNumPadAction extends TrNumPad{
 	 */
 	private static final long serialVersionUID = 1L;
 	static final int numpadHeight = 400;
-	
-	
+	Integer value;
+
+
+	private List<LoginEventListener> listeners = new ArrayList<LoginEventListener>();
+	public void addListener(LoginEventListener toAdd) {
+		listeners.add(toAdd);
+	}
+
+
 	/*
 	 * Used for User login
 	 *
@@ -43,6 +48,8 @@ public class TrNumPadAction extends TrNumPad{
 	public  TrNumPadAction(final JTextField textFieldOne) {
 
 		super(textFieldOne);
+
+
 
 		int buttonFontSize = 17;
 
@@ -145,11 +152,19 @@ public class TrNumPadAction extends TrNumPad{
 
 			public void actionPerformed(ActionEvent arg0) {
 
+				//todo move this away from here
 				//close applicaiton by hidden code
 				if(textFieldOne.getText().equals("1453"))
 					mainApplication.close();
 
-				User.getInstance().login( Integer.parseInt( textFieldOne.getText() ));
+
+				value =  Integer.parseInt( textFieldOne.getText());
+				//User.getInstance().login( Integer.parseInt( textFieldOne.getText() ));
+
+				// Notify everybody that may be interested.
+				for (LoginEventListener hl : listeners)
+					hl.update("login" );
+
 			}
 		});
 		
@@ -165,11 +180,14 @@ public class TrNumPadAction extends TrNumPad{
 		
 
 	}
-	
 
-	
-	
-	private void setValueForTextfield(String value,JTextField textfield){
+
+	public Integer getValue() {
+		return value;
+	}
+
+	private void setValueForTextfield(String value, JTextField textfield){
 		textfield.setText(textfield.getText() + value);
 	}
+
 }

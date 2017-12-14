@@ -1,5 +1,7 @@
 package tworunpos;
 
+import Exceptions.CounterException;
+import Exceptions.ZSessionException;
 import com.mongodb.*;
 
 import java.util.Date;
@@ -14,31 +16,38 @@ public class Counter {
     private static DBCollection collection;
     private String counterName;
 
-    public Counter() {
-        init();
-    }
 
-    private void init(){
-        db = DatabaseClient.getInstance().getConnectedDB();
-        collection = db.getCollection("counter");
-    }
+
 
     public Counter(String className) {
-        init();
+        db = DatabaseClient.getInstance().getConnectedDB();
+        collection = db.getCollection("counter");
         counterName = className;
     }
 
 
-    public Integer getCounter() throws Exception {
+    public Integer getCounter() throws CounterException {
 
         Integer counter = 0;
-        DBCursor cursor = collection.find().sort(new BasicDBObject().append("_id",counterName));
+        BasicDBObject searchObject = new BasicDBObject().append("_id",counterName);
+        DBCursor cursor = collection.find(searchObject);
         if(  cursor.one() != null  ){
             counter = Integer.parseInt(cursor.one().get("counter").toString());
-            DebugScreen.getInstance().print(getMyDocument().toString());
+//            DebugScreen.getInstance().print(getMyDocument().toString());
         }
         else{
-            throw new Exception("Counter '"+counterName+"' not found.");
+            //if counter was not found, create a new one and start with 0 as counter value
+            BasicDBObject newDocument = new BasicDBObject();
+            newDocument.put("_id", counterName);
+            newDocument.put("counter", 0);
+
+            try{
+            WriteResult result = collection.insert(WriteConcern.SAFE,newDocument);
+            }catch(Exception e){
+                throw new CounterException("Datenbankfehler beim Schreiben des Counters in in Counter.");
+            }
+
+            counter = getCounter(); //recursive
         }
 
         return counter;
@@ -57,16 +66,16 @@ public class Counter {
 
     }
 
-    public Integer getNext() throws Exception {
+    public Integer getNext() throws CounterException {
         return getCounter()+1;
     }
 
-    public void increment() throws Exception {
+    public void increment() throws CounterException {
         Integer counter = getCounter();
         updateCounter(counter+1);
     }
 
-    public void decrement() throws Exception {
+    public void decrement() throws CounterException {
         Integer counter = getCounter();
         updateCounter(counter-1);
     }
@@ -74,7 +83,7 @@ public class Counter {
     /*
     private because this is not relevant from outside, just for debugging and logs
      */
-    private BasicDBObject getMyDocument() throws Exception {
+    private BasicDBObject getMyDocument() throws CounterException {
 
         //create basic transaction attributes
         BasicDBObject mainDocument = new BasicDBObject();

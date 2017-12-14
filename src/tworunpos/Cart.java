@@ -203,7 +203,7 @@ public class Cart extends Observable {
 		//SIMPLE ARTICLE INTO CART
 				//add this article to the cart vector
 				articles.add(article);
-				notifyObservers( new Object[]{"add", article} );			
+				notifyObservers( new Object[]{"add", article} );
 			
 
 				//RELATED ARTICLE INTO CART

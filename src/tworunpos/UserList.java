@@ -41,7 +41,7 @@ public class UserList {
 			return foundUser;
 		}
 		else{
-			throw new Exception("PLU nicht gefunden");
+			throw new Exception("Default User not found.");
 		}
 		
 		
