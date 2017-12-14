@@ -26,6 +26,7 @@ public class DeviceManager {
 		try
 		{
 			scale = new ComScaleDialog06("COM3");
+
 			scale.writeDataTest();
 
 		}

@@ -48,7 +48,7 @@ public class ComScaleDialog06 implements SerialPortEventListener{
     final static char ENQ = 0x05;
     final static char ACK = 0x06;
     final static char NAK = 0x21;
-    final static char ESC = 0x27;
+    final static char ESC = 0x1B;
 
 
     final static int STX_ASCII = 2;
@@ -250,56 +250,60 @@ public class ComScaleDialog06 implements SerialPortEventListener{
     //pre: serial event is triggered
     //post: processing on the data it reads
     public void serialEvent(SerialPortEvent evt) {
+
         if (evt.getEventType() == SerialPortEvent.DATA_AVAILABLE)
         {
-
             try
             {
-                byte[] readBuffer = new byte[100];
-               // byte singleData = (byte)input.read();
+                byte singleData = (byte)input.read();
 
-                // read data
-                int bytes = 0;
-                try {
-                    while (input.available() > 0) {
-                        bytes = input.read();
-                    }
-                } catch (IOException e) {
-                    return;
+                if (singleData != NEW_LINE_ASCII)
+                {
+                    logText = new String(new byte[] {singleData});
+                    DebugScreen.getInstance().print(logText);
+                    //System.out.println("Receive: "+String.format("0x%02X", logText));
                 }
-
-                String[] messageHex = new String[bytes];
-                for(int i=0; i<bytes;i++){
-                    messageHex[i] = asciiToHex(new String(readBuffer,i,1));
+                else
+                {
+                    DebugScreen.getInstance().print("n");
                 }
-                System.out.println("Receive: "+messageHex);
-
-
-                //ComScaleDialog06String comString = new ComScaleDialog06String(messageHex);
-
-                if(bytes==21){
-                    System.out.println("NAK");
-
-                    //get status
-                    String s = ""+EOT+STX+"08"+ETX;
-                    System.out.println("Send: "+s);
-                    writeData(s);
-
-                    //get status
-                     s = ""+EOT+STX+"08"+ETX;
-                    System.out.println("Send: "+s);
-                    writeData(s);
-
-                }
-
-
             }
             catch (Exception e)
             {
                 logText = "Failed to read data. (" + e.toString() + ")";
-                DebugScreen.getInstance().print(logText);
+                DebugScreen.getInstance().print(logText+"n");
             }
         }
+
+
+               //ComScaleDialog06String comString = new ComScaleDialog06String(messageHex);
+
+               // Integer numberOfAnswer = getStringNumberOfIncomingString();
+                //DebugScreen.getInstance().print("NumberOfAnswer: "+numberOfAnswer);
+
+                //if(bytes==21){
+/*                    System.out.println("NAK");
+                    //get status
+                    String s = ""+EOT+STX+"08"+ETX;
+                    System.out.println("Send: "+s);
+                    writeData(s);*/
+
+
+
+
+//
+
+//
+//                    //get status
+//                     s = ""+EOT+STX+"08"+ETX;
+//                    System.out.println("Send: "+s);
+//                    writeData(s);*/
+
+
+
+
+
+
     }
 
 
@@ -311,7 +315,9 @@ public class ComScaleDialog06 implements SerialPortEventListener{
     public void writeDataTest( ){
         try
         {
-            String send = ""+EOT+STX+"01"+ESC+"11111"+ESC+ETX;
+            String send = getString1("111111");
+            //send = ""+NAK;
+
             output.write(send.getBytes());
 //            output.write(ascii);
             output.flush();
@@ -379,4 +385,68 @@ public class ComScaleDialog06 implements SerialPortEventListener{
         }
         return hex.toString();
     }
+
+
+    //Strings we send
+
+    public String getString1(String grundpreis){
+        return ""+EOT+STX+"01"+ESC+grundpreis+ESC+ETX;
+    }
+
+    //Übermittlung von Grundpreis, Tarawert
+    public String getString3(String grundpreis, String tara){
+        return ""+EOT+STX+"03"+ESC+grundpreis+ESC+tara+ETX;
+    }
+
+    //Übermittlung von Grundpreis,  Text
+    public String getString4(String grundpreis, String text){
+        return ""+EOT+STX+"04"+ESC+grundpreis+ESC+text+ETX;
+    }
+
+    //Übermittlung von Grundpreis, Tarawert und Text
+    public String getString5(String grundpreis, String tara, String text){
+        return ""+EOT+STX+"05"+ESC+grundpreis+ESC+tara+ESC+text+ETX;
+    }
+
+    //Anforderung der Statusinformation nach Empfang
+    public String getString8(){
+        return ""+EOT+STX+"08"+ETX;
+    }
+
+    //Checksummen + Korrekturwert and wie Waage übermitteln
+    public String getString10(String n1, String n2, String n3, String n4, String n5 ){
+        return ""+EOT+STX+"10"+ESC+n1+n2+n3+n4+n5+ESC+ETX;
+    }
+
+    //Logische Versionsnummer ein / aus
+    public String getString20(boolean b){
+        String onoff = (b == true ? "1" : "0");
+        return ""+EOT+STX+"20"+ESC+onoff+ETX;
+    }
+    public String getString80(){
+        return ""+EOT+STX+"80"+ESC;
+    }
+
+    public String getString81(){
+        return ""+EOT+STX+"81"+ETX;
+    }
+
+    public String getENQ(){
+        return ""+EOT+ENQ;
+    }
+
+
+    //extrahiere satznummer des empfangenen strings
+    public Integer getStringNumberOfIncomingString(String string) throws Exception {
+
+
+        System.out.println("lookupAscii 0: "+lookupAscii(string.charAt(0)));
+        System.out.println("lookupAscii 1: "+lookupAscii(string.charAt(1)));
+        System.out.println("lookupAscii 2: "+lookupAscii(string.charAt(2)));
+        if(string.length() >= 2)
+            return string.charAt(2)+string.charAt(3);
+        else
+            throw new Exception("Incoming string not well formed: "+string);
+    }
+
 }
