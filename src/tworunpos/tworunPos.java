@@ -100,6 +100,7 @@ public class tworunPos extends JFrame {
 	//State
 	PosState state = PosState.getInstance();
 
+
 	
 	
 	
@@ -112,6 +113,8 @@ public class tworunPos extends JFrame {
 	private DataFileImporter myDataImporter;
 	private Config config;
 	private DebugScreen debug;
+
+	private ZSessionList zSessionList;
 
 
 
@@ -135,22 +138,13 @@ public class tworunPos extends JFrame {
 		//start the loginmask to login; this method will stop the process here, until user logs in
 		state.changeStateToLogin(false);
 
+
+
         while(!salesUser.loggedIn()){};
 
 		//------------------ZSession
-		ZSessionList zSessionList = new ZSessionList();
-		try {
-			openZSession = zSessionList.getOpenZSession();
-			GuiElements.displayInfoMessageBox("Z-No: "+openZSession.getCounter());
-		} catch (ZSessionException e) {
-			GuiElements.displayInfoMessageBox("Z-Fehler: "+e.getMessage());
+		//initZSession();
 
-			e.printStackTrace();
-		} catch (CounterException e) {
-
-			GuiElements.displayInfoMessageBox("Counter-Fehler: "+e.getMessage());
-			e.printStackTrace();
-		}
 		setTitle(frameTitle);
 		createMainGui();
 		initWindow();
@@ -233,22 +227,35 @@ public class tworunPos extends JFrame {
 		
 	}
 
+	private void initZSession(){
+
+		zSessionList = new ZSessionList();
+		try {
+			openZSession = zSessionList.getOpenZSession();
+			GuiElements.displayInfoMessageBox("Z-No: "+openZSession.getCounter());
+		} catch (ZSessionException e) {
+			GuiElements.displayInfoMessageBox("Z-Fehler: "+e.getMessage());
+
+			e.printStackTrace();
+		} catch (CounterException e) {
+
+			GuiElements.displayInfoMessageBox("Counter-Fehler: "+e.getMessage());
+			e.printStackTrace();
+		}
+
+	}
+
 		private class LoginObserver implements LoginEventListener {
 			@Override
 			public void update(String action) {
 
 				if(action == "login"){
 					salesUser.login(loginmask.getInputValue());
+					initZSession();
                     //close the loginscreen and continue with sale screen
                     loginmask.setVisible(false); //you can't see me!
                     loginmask.dispose(); //Destroy the JFrame object
-
-
-
-
-
-
-
+					state.changeStateToReady(true);
                 }
 				else if(action == "logout"){
 
@@ -1108,7 +1115,6 @@ public class tworunPos extends JFrame {
 		
 		display.clearDisplay();
 		display.showSimpleTextOnDisplay("Option auswählen!");
-//		textfieldOne.requestFocus();
 		initRightBarSettings();
 	}
 

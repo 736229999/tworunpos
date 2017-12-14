@@ -45,7 +45,6 @@ public class mainApplication {
 		    	try {
 					DeviceManager.getInstance().closeAllDevices();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 		    	
