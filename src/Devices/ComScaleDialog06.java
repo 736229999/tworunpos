@@ -252,36 +252,47 @@ public class ComScaleDialog06 implements SerialPortEventListener{
     public void serialEvent(SerialPortEvent evt) {
         if (evt.getEventType() == SerialPortEvent.DATA_AVAILABLE)
         {
+
             try
             {
-                byte singleData = (byte)input.read();
+                byte[] readBuffer = new byte[100];
+               // byte singleData = (byte)input.read();
 
-                if (singleData != NEW_LINE_ASCII)
-                {
-
-                    byte[] bytes = new byte[] {singleData};
-                    String text = new String(bytes);   // if the charset is ISO Latin 1
-                    char[] chars = text.toCharArray();
-
-
-                    if(bytes[0]==21){
-                        System.out.println("NAK");
-
-                        String s = ""+EOT+STX+"08"+ETX;
-                        System.out.println("send: "+s);
-                        writeData(s);
-
+                // read data
+                int bytes = 0;
+                try {
+                    while (input.available() > 0) {
+                        bytes = input.read();
                     }
-                    //DebugScreen.getInstance().print("Received: "+Integer.parseInt(s));
-                    System.out.println(bytes);
-                    DebugScreen.getInstance().print("Received "+chars.length+" char: "+lookupAscii(chars[0]));
+                } catch (IOException e) {
+                    return;
+                }
+
+                String[] messageHex = new String[bytes];
+                for(int i=0; i<bytes;i++){
+                    messageHex[i] = asciiToHex(new String(readBuffer,i,1));
+                }
+                System.out.println("Receive: "+messageHex);
 
 
+                //ComScaleDialog06String comString = new ComScaleDialog06String(messageHex);
+
+                if(bytes==21){
+                    System.out.println("NAK");
+
+                    //get status
+                    String s = ""+EOT+STX+"08"+ETX;
+                    System.out.println("Send: "+s);
+                    writeData(s);
+
+                    //get status
+                     s = ""+EOT+STX+"08"+ETX;
+                    System.out.println("Send: "+s);
+                    writeData(s);
+
                 }
-                else
-                {
-                    DebugScreen.getInstance().print("Received: Newline \n");
-                }
+
+
             }
             catch (Exception e)
             {
@@ -300,7 +311,7 @@ public class ComScaleDialog06 implements SerialPortEventListener{
     public void writeDataTest( ){
         try
         {
-            String send = ""+EOT+STX+"01"+ESC+"123456"+ESC+ETX;
+            String send = ""+EOT+STX+"01"+ESC+"11111"+ESC+ETX;
             output.write(send.getBytes());
 //            output.write(ascii);
             output.flush();
@@ -332,13 +343,13 @@ public class ComScaleDialog06 implements SerialPortEventListener{
 
     public String lookupAscii(char a){
         switch(a){
-            case STX: return "STX";
-            case ETX: return "ETX";
-            case EOT: return "EOT";
-            case ENQ: return "ENQ";
-            case ACK: return "ACK";
-            case NAK: return "NAK";
-            case ESC: return "ESC";
+            case STX: return "<STX>";
+            case ETX: return "<ETX>";
+            case EOT: return "<EOT>";
+            case ENQ: return "<ENQ>";
+            case ACK: return "<ACK>";
+            case NAK: return "<NAK>";
+            case ESC: return "<ESC>";
         }
         return "";
     }
@@ -356,5 +367,16 @@ public class ComScaleDialog06 implements SerialPortEventListener{
             hexValue[i*2] = symbols[current >> 4];
         }
         return hexValue;
+    }
+
+    private static String asciiToHex(String asciiValue)
+    {
+        char[] chars = asciiValue.toCharArray();
+        StringBuffer hex = new StringBuffer();
+        for (int i = 0; i < chars.length; i++)
+        {
+            hex.append(Integer.toHexString((int) chars[i]));
+        }
+        return hex.toString();
     }
 }
