@@ -10,12 +10,22 @@ public class ComScaleDialog06String {
     private int x;
     private int z;
 
-
+    final static char NUL = 0x01;
     final static char STX = 0x02;
     final static char ETX = 0x03;
     final static char EOT = 0x04;
     final static char ENQ = 0x05;
     final static char ACK = 0x06;
+    final static char BEL = 0x07;
+    final static char BS = 0x08;
+    final static char HT = 0x09;
+    final static char LF = 0x0A;
+    final static char VT = 0x0B;
+    final static char FF = 0x0C;
+    final static char CR = 0x0D;
+    final static char SO = 0x0E;
+    final static char SI = 0x0F;
+
     final static char NAK = 0x21;
     final static char ESC = 0x1B;
 
