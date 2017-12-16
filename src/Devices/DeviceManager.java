@@ -1,7 +1,6 @@
 package Devices;
 
 
-import gnu.io.SerialPortEvent;
 import tworunpos.DebugScreen;
 
 
@@ -25,9 +24,8 @@ public class DeviceManager {
 
 		try
 		{
-			scale = new ComScaleDialog06("COM3");
-
-			scale.writeDataTest();
+			ComScaleDialog06 scale = new ComScaleDialog06();
+			scale.connect("COM3");
 
 		}
 		catch ( Exception e )
@@ -68,7 +66,7 @@ public class DeviceManager {
 		}
 
 		if(scale != null){
-			scale.close();
+			//scale.close();
 			DebugScreen.getInstance().print("--scale closed");
 		}
 	}

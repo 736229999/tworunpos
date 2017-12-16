@@ -20,7 +20,7 @@ public final class Rotate {
         if (bitstorotate == 0)
             return 0;
 
-        c = 0x80000000;
+        c = 0x00000000;
         mask = (c >> bitstorotate);
         if (direction == ROTATE_RIGHT)
         {
@@ -56,7 +56,7 @@ public final class Rotate {
         tmprslt = value & mask;
 
         // perform the actual rotate right
-        target = (value  >>> bitstorotate);
+        target = (value  >> bitstorotate);
 
         // now rotate the saved off bits so they are in the proper place
         tmprslt <<= (sizet - bitstorotate);
