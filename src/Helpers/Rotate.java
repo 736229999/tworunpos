@@ -20,7 +20,7 @@ public final class Rotate {
         if (bitstorotate == 0)
             return 0;
 
-        c = 0x00000000;
+        c = 0x80000000;
         mask = (c >> bitstorotate);
         if (direction == ROTATE_RIGHT)
         {
@@ -86,7 +86,7 @@ public final class Rotate {
         tmprslt = value & mask;
 
         // perform the actual rotate
-        target = (value  << bitstorotate);
+        target = ((value & 0xff)  << bitstorotate);
 
         // now shift the saved off bits
         tmprslt >>>= (sizet - bitstorotate);
@@ -97,6 +97,88 @@ public final class Rotate {
         // now return the result
         return target;
     }
+
+
+    private static char rotl(char value, int bitstorotate, int sizet)
+    {
+
+        if(bitstorotate == 0)
+            return value;
+
+        char tmprslt =0;
+        char tmprslt2 =0;
+        char mask=0;;
+        char target=0;
+
+        bitstorotate %= sizet;
+
+        // determine which bits will be impacted by the rotate
+        //mask = calcmask(bitstorotate, ROTATE_LEFT);
+        //own mask method
+        mask = 0xFFFF;
+        mask = (char)((mask & 0xFFFF) >> bitstorotate);
+        mask = (char)~mask;
+
+
+        // save off the affected bits
+        tmprslt = (char)(value & mask);
+
+        // perform the actual rotate
+        target = (char)((value & 0xffff)  << bitstorotate);
+
+        // now shift the saved off bits
+        int rotateBack = (sizet - bitstorotate);
+        tmprslt2 = (char)( (tmprslt ) >> rotateBack);
+
+
+        // add the rotated bits back in (in the proper location)
+        target = (char) (target | tmprslt2);
+
+        // now return the result
+        return (char)target;
+    }
+
+
+
+    private static char rotr(char value, int bitstorotate, int sizet)
+    {
+
+        if(bitstorotate == 0)
+            return value;
+
+        char tmprslt =0;
+        char tmprslt2 =0;
+        char mask=0;;
+        char target=0;
+
+        bitstorotate %= sizet;
+
+        // determine which bits will be impacted by the rotate
+        //mask = calcmask(bitstorotate, ROTATE_LEFT);
+        //own mask method
+        mask = 0xFFFF;
+        mask = (char)((mask & 0xFFFF) << bitstorotate);
+        mask = (char)~mask;
+
+
+        // save off the affected bits
+        tmprslt = (char)(value & mask);
+
+        // perform the actual rotate
+        target = (char)((value & 0xffff)  >> bitstorotate);
+
+        // now shift the saved off bits
+        int rotateBack = (sizet - bitstorotate);
+        tmprslt2 = (char)( (tmprslt ) << rotateBack);
+
+
+        // add the rotated bits back in (in the proper location)
+        target = (char) (target | tmprslt2);
+
+        // now return the result
+        return (char)target;
+    }
+
 
 
     public static int rotr(int value, int bitstorotate)
@@ -117,7 +199,7 @@ public final class Rotate {
     {
         char result;
 
-        result = (char) rotr((0x0000ffff & value), bitstorotate, 16);
+        result =  rotr((char) (0x0000ffff & value), bitstorotate, 16);
 
         return result;
     }
@@ -151,7 +233,7 @@ public final class Rotate {
     {
         char result;
 
-        result = (char) rotl((0x0000ffff & value), bitstorotate, 16);
+        result =  rotl((char)(0xffff & value), bitstorotate, 16);
 
         return result;
 

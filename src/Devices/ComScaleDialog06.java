@@ -133,8 +133,8 @@ public class ComScaleDialog06
                 }
 
 
-                System.out.println("IncomeString: "+buffer);
-                System.out.println("Number: "+stringId);
+                System.out.println("IN com: "+(new String(buffer)).toString());
+                //System.out.println("Number: "+stringId);
 
 
 
@@ -159,12 +159,10 @@ public class ComScaleDialog06
                             String send = getString10(z1,z2);
                             out1.write(send.getBytes());
                         }else{
-                            //String send = getString8();
-                            //out1.write(send.getBytes());
-                            if (d==S11_CHECK_FAILED){
-                                String send = getStringToGetCalculation();
+
+                                String send = getString1("12345");
                                 out1.write(send.getBytes());
-                            }
+
 
                         }
                     }break;
@@ -235,6 +233,7 @@ public class ComScaleDialog06
                 while ( ( c = System.in.read()) > -1 )
                 {
                     this.out.write(c);
+
                 }
             }
             catch ( IOException e )
@@ -307,7 +306,8 @@ public class ComScaleDialog06
 
         String kwRotated_String = String.format("%04x", (int) kwRotated);
         String csRotated_String = String.format("%04x", (int) csRotated);
-        String result = ""+EOT+STX+"10"+ESC+csRotated_String+kwRotated_String+ETX;
+        String result = ""+EOT+STX+"10"+ESC+csRotated_String.toUpperCase()+kwRotated_String.toUpperCase()+ETX;
+        System.out.println(result);
         return result;
     }
 
