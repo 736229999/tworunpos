@@ -55,6 +55,10 @@ public class Config {
 	
 	
 	private String[] weighItems =  new String[10];
+
+
+
+	private  String scaleComPort = "com3";
 	
 	
 	public Config() throws IOException {
@@ -135,8 +139,10 @@ public class Config {
 						System.out.println("Read WeighBarcode into Config: "+this.weighItems[i]);
 					}
 				}
-					
-				
+
+				//todo remove when read from json
+				weighItems[0] = "28";
+
 		
 		} catch (ParseException ex) {
 			ex.printStackTrace();
@@ -208,6 +214,11 @@ public class Config {
 
 	public void setWeighItems(String[] weighItems) {
 		this.weighItems = weighItems;
+	}
+
+
+	public String getScaleComPort() {
+		return scaleComPort;
 	}
 
 	//Singleton get Instantce

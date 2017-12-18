@@ -59,7 +59,12 @@ public class ArticleUnit {
 		}
 		return false;
 	}
-	
+	public boolean isWeight(){
+		if(unit == TYPE_WEIGHT){
+			return true;
+		}
+		return false;
+	}
 	public String toString(){
 		return getShortNameGerman();
 	}

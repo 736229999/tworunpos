@@ -157,7 +157,7 @@ public class tworunPos extends JFrame {
 
 		
 
-	
+	/*
 		
 		//listen to all keystrokes for commands e.g. barcodes from scanner
 		//textfieldOne.addKeyListener(this);
@@ -214,7 +214,7 @@ public class tworunPos extends JFrame {
 	                }
 	                return false;
 	       }
-	    });
+	    });*/
 		
 		
 //		state.changeState(PosState.posStateReady);

@@ -1,11 +1,15 @@
 package Devices;
 
+import Exceptions.ScaleException;
 import Helpers.Rotate;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
+import tworunpos.Article;
+import tworunpos.Config;
+
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +25,8 @@ public class ComScaleDialog06
 {
 
 
+    // Singleton!
+    static ComScaleDialog06 instance;
 
     //return codes of string 11
     final static int S11_SEND_AGAIN = 2;
@@ -46,14 +52,31 @@ public class ComScaleDialog06
     final static char NAK = 0x21;
     final static char ESC = 0x1B;
 
+
+
+
+
     static OutputStream out1;
+
+
+    //result from String 02
+    private Double weight = 0.000;
+    private Double baseprice = 0.000;
+    private Double tara = 0.000;
+    private Double calculatedSalesprice = 0.000;
+    private Integer scaleStatus = 0;
+
+    //result of String 08
+    private Integer statusCode = 0;
+
+    private String lastMessageReceived;
 
     public ComScaleDialog06()
     {
         super();
     }
 
-    void connect ( String portName ) throws Exception
+    public void connect ( String portName ) throws Exception
     {
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
         if ( portIdentifier.isCurrentlyOwned() )
@@ -91,7 +114,7 @@ public class ComScaleDialog06
      * Handles the input coming from the serial port. A new line character
      * is treated as the end of a block in this example. 
      */
-    public static class SerialReader implements SerialPortEventListener
+    public  class SerialReader implements SerialPortEventListener
     {
         private InputStream in;
         private byte[] buffer = new byte[1024];
@@ -105,6 +128,7 @@ public class ComScaleDialog06
             int data;
             //emtpy buffer
             buffer  = new byte[buffer.length];
+            lastMessageReceived = null;
 
             //todo check why cheksum is nor working
 
@@ -132,6 +156,7 @@ public class ComScaleDialog06
                     System.out.println(e.getMessage());
                 }
 
+                lastMessageReceived = buffer.toString();
 
                 System.out.println("IN com: "+(new String(buffer)).toString());
                 //System.out.println("Number: "+stringId);
@@ -167,8 +192,32 @@ public class ComScaleDialog06
                         }
                     }break;
 
-                    case 2: System.out.println("now proceed result");break; //todo weight result - proceed result
-                    case 9: System.out.println("print status information");break; //todo print info
+                    case 2:{
+                        System.out.println("Weight data arrived. proceed...");
+
+                        //parse Status from result
+                        char statusTmp = (char)(0x00 | (buffer[1] << 4));
+                        statusTmp = (char)(statusTmp | buffer[2]);
+                        scaleStatus =  hexToInt(statusTmp);
+
+                        //parse weight from result
+                        weight = Double.parseDouble(buffer.toString().substring(7,11))/1000;
+
+                        //parse baseprice from result
+                        baseprice = Double.parseDouble(buffer.toString().substring(13,18))/100;
+
+                        //parse salesprice from result
+                        calculatedSalesprice = Double.parseDouble(buffer.toString().substring(20,25))/100;
+
+                    }break; //todo weight result - proceed result
+
+                    case 9: {
+                        System.out.println("09: status information");
+                        char statusTmp = (char)(0x00 | (buffer[4] << 4));
+                        statusTmp = (char)(statusTmp | buffer[5]);
+                        statusCode =  hexToInt(statusTmp);
+
+                    }break; //todo print info
 
                     //ACK - checksum was correct - get calculation
                     case 98: System.out.println("get calculation");
@@ -244,93 +293,94 @@ public class ComScaleDialog06
         }
     }
 
+
+    public static int hexToInt(char a){
+        int result;
+
+        result = Character.digit(a,16);
+
+        return result;
+    }
+
     //Strings we send
 
-    public static String getString1(String grundpreis){
+    private static String getString1(String grundpreis){
         return ""+EOT+STX+"01"+ESC+grundpreis+ESC+ETX;
     }
 
     //Übermittlung von Grundpreis, Tarawert
-    public static String getString3(String grundpreis, String tara){
+    private static String getString3(String grundpreis, String tara){
         return ""+EOT+STX+"03"+ESC+grundpreis+ESC+tara+ETX;
     }
 
     //Übermittlung von Grundpreis,  Text
-    public static String getString4(String grundpreis, String text){
+    private static String getString4(String grundpreis, String text){
         return ""+EOT+STX+"04"+ESC+grundpreis+ESC+text+ETX;
     }
 
     //Übermittlung von Grundpreis, Tarawert und Text
-    public static String getString5(String grundpreis, String tara, String text){
+    private static String getString5(String grundpreis, String tara, String text){
         return ""+EOT+STX+"05"+ESC+grundpreis+ESC+tara+ESC+text+ETX;
     }
 
     //Anforderung der Statusinformation nach Empfang
-    public static String getString8(){
+    private static String getString8(){
         return ""+EOT+STX+"08"+ETX;
     }
 
-    public static String getStringToGetCalculation(){
+    private static String getStringToGetCalculation(){
         return ""+EOT+ENQ;
     }
 
-    //Checksummen + Korrekturwert and wie Waage übermitteln
-    public static String getString10(int z1, int z2 ){
 
-        //coding
-        //byte high = (byte) (z & 0xF0);
-        //byte low = (byte) (z  & 0x0F);
-
-
-        //verschlüssele
-
-        //Split value in 4 bits (higher nibble, lower nibble)
+    /*
+        Checksummen + Korrekturwert and wie Waage übermitteln
+        param1: higher nibble
+        param2: lower nibble
+         */
+    private static String getString10(int z1, int z2 ){
 
 
-        //todo calculation
 
-        //0xF336 KW
+        // KW=0xF336  CS=0x4711
         char  kw = (char)((0xF<<12)+(0x3<<8)+(0x3<<4)+(0x6)); //unsigned short
         char  cs = (char)((0x4<<12)+(0x7<<8)+(0x1<<4)+(0x1));
 
 
+        //rotate cs an kw - encryption before sending data to scale
         char csRotated = Rotate.rotl(cs,z1);
         char kwRotated = Rotate.rotr(kw,z2);
 
 
-        //char csRotated = (char)(Integer.rotateLeft(cs,z1) & 0x0000FFFF);
-        //char kwRotated = (char)(Integer.rotateRight(kw,z2) & 0x0000FFFF);
-        //byte[] kwBack = Rotate.intToByteArray(kwRotated);
-        //String kwStringFinal = new String(kwBack);
-
-
+        //convert rotated cs and kw to strings before sending
         String kwRotated_String = String.format("%04x", (int) kwRotated);
         String csRotated_String = String.format("%04x", (int) csRotated);
+
+        //bring final string together as string
         String result = ""+EOT+STX+"10"+ESC+csRotated_String.toUpperCase()+kwRotated_String.toUpperCase()+ETX;
-        System.out.println(result);
         return result;
     }
 
     //Logische Versionsnummer ein / aus
-    public static String getString20(boolean b){
+    private static String getString20(boolean b){
         String onoff = (b == true ? "1" : "0");
         return ""+EOT+STX+"20"+ESC+onoff+ETX;
     }
-    public static String getString80(){
+    private static String getString80(){
         return ""+EOT+STX+"80"+ESC;
     }
 
-    public static String getString81(){
+    private static String getString81(){
         return ""+EOT+STX+"81"+ETX;
     }
 
-    public static String getENQ(){
+    private static String getENQ(){
         return ""+EOT+ENQ;
     }
 
 
     //extrahiere satznummer des empfangenen strings
-    public static int  getStringNumberOfIncomingString(byte[] string) throws Exception {
+    private static int  getStringNumberOfIncomingString(byte[] string) throws Exception {
         if(string.length >= 3){
 
             char [] charArray = new char[string.length];
@@ -347,7 +397,7 @@ public class ComScaleDialog06
     }
 
     //extract value Z (int) of string 11
-    public static int  getZ1ValueOfString11(byte[] string) throws Exception {
+    private static int  getZ1ValueOfString11(byte[] string) throws Exception {
     if(string.length >= 3){
 
         char [] charArray = new char[string.length];
@@ -355,7 +405,7 @@ public class ComScaleDialog06
             charArray[i] = (char)string[i];
         }
 
-        int result = Rotate.hexToInt(charArray[5]);
+        int result = hexToInt(charArray[5]);
 
         return result;
     }
@@ -363,7 +413,7 @@ public class ComScaleDialog06
         throw new Exception("Incoming string not well formed: "+string);
 }
 
-    public static int  getZ2ValueOfString11(byte[] string) throws Exception {
+    private static int  getZ2ValueOfString11(byte[] string) throws Exception {
         if(string.length >= 3){
 
             char [] charArray = new char[string.length];
@@ -371,7 +421,7 @@ public class ComScaleDialog06
                 charArray[i] = (char)string[i];
             }
 
-            int result = Rotate.hexToInt(charArray[6]);
+            int result = hexToInt(charArray[6]);
 
             return result;
         }
@@ -380,7 +430,7 @@ public class ComScaleDialog06
     }
 
     //extract value D (int) of string 11
-    public static int  getDValueOfString11(byte[] string) throws Exception {
+    private static int  getDValueOfString11(byte[] string) throws Exception {
         if(string.length >= 5){
 
             char [] charArray = new char[string.length];
@@ -397,6 +447,75 @@ public class ComScaleDialog06
     }
 
 
+
+    public void weighArticle(Article article) throws ScaleException {
+
+        weight = 0.000;
+        baseprice = 0.000;
+        tara = 0.000;
+        calculatedSalesprice = 0.000;
+
+        //baseprice
+        String baseprice = new Double(article.getPriceGross()*100).toString();
+
+        //todo tara
+        //String tara = new Double(article.getTara()*100).toString();
+        String tara = "0000";
+
+        //text
+        String text = article.getName().substring(0,12);
+
+
+        try {
+            out1.write(getString5(baseprice,tara,text).getBytes());
+        } catch (IOException e) {
+            throw new ScaleException("Fehler beim Senden von Artikel an die Waage.");
+        }
+
+
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public Double getBaseprice() {
+        return baseprice;
+    }
+
+    public Double getTara() {
+        return tara;
+    }
+
+    public Double getCalculatedSalesprice() {
+        return calculatedSalesprice;
+    }
+
+    public Integer getScaleStatus(){
+
+        return scaleStatus;
+    }
+
+    public Integer getStatusCode(){
+
+        return statusCode;
+    }
+
+
+    public String getLastMessageReceived() {
+        return lastMessageReceived;
+    }
+
+
+
+    //Singleton get Instantce
+    public static synchronized ComScaleDialog06 getInstance () throws Exception {
+        if (instance == null) {
+            instance = new ComScaleDialog06 ();
+            instance.connect(Config.getInstance().getScaleComPort());
+        }
+        return instance;
+    }
 
 
     public static void main ( String[] args )

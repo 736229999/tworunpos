@@ -1,11 +1,14 @@
 package tworunpos;
 
+import Devices.ComScaleDialog06;
 import Devices.DeviceManager;
 import Devices.JPosPrinter;
 import Exceptions.CheckoutGeneralException;
 import Exceptions.CheckoutPaymentException;
+import Exceptions.ScaleException;
 import Prints.Receipt;
 import com.mongodb.*;
+import com.usb.core.Device;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -161,9 +164,6 @@ public class Cart extends Observable {
 		setChanged();
 		
 
-
-		
-		
 		
 		//check quantity
 		DebugScreen.getInstance().print("unit: "+articleA.getUnit().getUnit()+"   isPiece: "+articleA.getUnit().isPiece()+"    quantity%1 = "+(quantity%1));
@@ -189,12 +189,37 @@ public class Cart extends Observable {
 		else if(article.isDeposit()){
 			addRefundByArticle(article);
 		}
-		
+
+		//its a weight article, so do weight operation
+		else if(article.isWeighArticle()){
+			addWeighArticle(article);
+		}
+
+
 		//usual article, so simple
 		else{
 			addSimpleArticle(article);
 		}
 		
+	}
+
+	//this method adds an usual article to the cart
+	private void addWeighArticle(CartArticle article) throws Exception {
+
+		DebugScreen.getInstance().print("addWeighArticle");
+		DeviceManager.getInstance().getScale().weighArticle(article);
+
+		DebugScreen.getInstance().print("addWeighArticle 1");
+		Double saleprice = DeviceManager.getInstance().getScale().getCalculatedSalesprice();
+
+		DebugScreen.getInstance().print("addWeighArticle 2");
+		Double weight = DeviceManager.getInstance().getScale().getWeight();
+
+		DebugScreen.getInstance().print("addWeighArticle 3");
+		article.setQuantity(new Float(weight));
+		DebugScreen.getInstance().print("addWeighArticle 4");
+		article.setPriceGross(saleprice);
+		addSimpleArticle(article);
 	}
 	
 	

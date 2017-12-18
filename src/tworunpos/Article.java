@@ -157,6 +157,10 @@ public class Article {
 		this.depositBarcode = depositBarcode;
 	}
 
+	public boolean isWeighArticle(){
+		return (this.unit.isWeight());
+	}
+
 	public boolean isWeighArticleByBarcode(){
 		return Config.getInstance().isInWeighCodeList(barcode.substring(0, 1));
 	}

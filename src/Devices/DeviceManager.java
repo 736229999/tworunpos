@@ -24,8 +24,7 @@ public class DeviceManager {
 
 		try
 		{
-			ComScaleDialog06 scale = new ComScaleDialog06();
-			scale.connect("COM3");
+			ComScaleDialog06 scale = ComScaleDialog06.getInstance();
 
 		}
 		catch ( Exception e )
@@ -52,8 +51,7 @@ public class DeviceManager {
 		return lineDisplay;
 	}
 
-
-
+	public ComScaleDialog06 getScale() { return scale;	}
 
 	public void closeAllDevices(){
 		if(printer != null){
@@ -75,10 +73,10 @@ public class DeviceManager {
 	
 	//Singleton get Instantce
 	public static synchronized DeviceManager getInstance () throws Exception {
-		if (DeviceManager.instance == null) {
-			DeviceManager.instance = new DeviceManager ();
+		if (instance == null) {
+			instance = new DeviceManager ();
 		}
-		return DeviceManager.instance;
+		return instance;
 	}
 	
 }
