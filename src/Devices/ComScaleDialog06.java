@@ -1,5 +1,6 @@
 package Devices;
 
+import Exceptions.DeviceException;
 import Exceptions.ScaleException;
 import Helpers.Rotate;
 import gnu.io.CommPort;
@@ -7,6 +8,7 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
+import org.apache.commons.lang.StringUtils;
 import tworunpos.Article;
 import tworunpos.Config;
 
@@ -193,7 +195,7 @@ public class ComScaleDialog06
                     }break;
 
                     case 2:{
-                        System.out.println("Weight data arrived. proceed...");
+                        System.out.println("Weight data arrived. processing...");
 
                         //parse Status from result
                         char statusTmp = (char)(0x00 | (buffer[1] << 4));
@@ -201,15 +203,23 @@ public class ComScaleDialog06
                         scaleStatus =  hexToInt(statusTmp);
 
                         //parse weight from result
-                        weight = Double.parseDouble(buffer.toString().substring(7,11))/1000;
+                        String weighFromScale= (new String(buffer)).toString().substring(7,11);
+                        weight = Double.parseDouble(weighFromScale)/1000;
 
                         //parse baseprice from result
-                        baseprice = Double.parseDouble(buffer.toString().substring(13,18))/100;
+                        String basePriceFromScale = (new String(buffer)).toString().substring(12,18);
+                        baseprice = Double.parseDouble(basePriceFromScale)/100;
 
                         //parse salesprice from result
-                        calculatedSalesprice = Double.parseDouble(buffer.toString().substring(20,25))/100;
+                        String salesPriceFromScale = (new String(buffer)).toString().substring(20,25);
+                        calculatedSalesprice = Double.parseDouble(salesPriceFromScale)/100;
+                        System.out.println("Weight data processed.");
+                        System.out.println("**scaleStatus: "+scaleStatus);
+                        System.out.println("**weight: "+weight);
+                        System.out.println("**baseprice: "+baseprice);
+                        System.out.println("**calculatedSalesprice: "+calculatedSalesprice);
 
-                    }break; //todo weight result - proceed result
+                    }break;
 
                     case 9: {
                         System.out.println("09: status information");
@@ -456,15 +466,17 @@ public class ComScaleDialog06
         calculatedSalesprice = 0.000;
 
         //baseprice
-        String baseprice = new Double(article.getPriceGross()*100).toString();
+        String baseprice = ""+((int)(article.getPriceGross()*100) ) ;
+        //left pad with zeros
+        baseprice = StringUtils.leftPad(baseprice, 6, "0");
 
         //todo tara
         //String tara = new Double(article.getTara()*100).toString();
         String tara = "0000";
 
         //text
-        String text = article.getName().substring(0,12);
-
+        String text = article.getName().substring(0,(article.getName().length()>=13?13:article.getName().length()));
+        text = StringUtils.rightPad(text, 13, " ");
 
         try {
             out1.write(getString5(baseprice,tara,text).getBytes());
@@ -509,10 +521,15 @@ public class ComScaleDialog06
 
 
     //Singleton get Instantce
-    public static synchronized ComScaleDialog06 getInstance () throws Exception {
+    public static synchronized ComScaleDialog06 getInstance () throws DeviceException {
         if (instance == null) {
             instance = new ComScaleDialog06 ();
-            instance.connect(Config.getInstance().getScaleComPort());
+            try {
+                instance.connect(Config.getInstance().getScaleComPort());
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw  new DeviceException(e.getMessage());
+            }
         }
         return instance;
     }

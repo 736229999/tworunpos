@@ -58,14 +58,14 @@ public class Config {
 
 
 
-	private  String scaleComPort = "com3";
+	private  String scaleComPort = "COM3";
 	
 	
 	public Config() throws IOException {
 		try {
 			// read the json file
 
-			System.out.println("Cannot read file. " + this.getClass().getResource("config/config.trn").getFile());
+			System.out.println("Cannot read file. " + this.getClass().getResource("resources/config/config.trn").getFile());
 
 			File file = new File(this.getClass().getResource("config/config.trn").getFile());
 			StringBuilder result = new StringBuilder();

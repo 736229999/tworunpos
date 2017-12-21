@@ -5,6 +5,7 @@ import Devices.DeviceManager;
 import Devices.JPosPrinter;
 import Exceptions.CheckoutGeneralException;
 import Exceptions.CheckoutPaymentException;
+import Exceptions.DeviceException;
 import Exceptions.ScaleException;
 import Prints.Receipt;
 import com.mongodb.*;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Observable;
 import java.util.Vector;
-
+import java.util.concurrent.TimeUnit;
 
 
 public class Cart extends Observable {
@@ -118,7 +119,7 @@ public class Cart extends Observable {
 	}
 	
 	
-	public void addArticleByBarcode(String barcode, float quantity) throws Exception{
+	public void addArticleByBarcode(String barcode, float quantity) throws DeviceException,Exception{
 
 		ArticleList articleList = ArticleList.getInstance();
 			try {
@@ -128,7 +129,7 @@ public class Cart extends Observable {
 				}
 				
 				DebugScreen.getInstance().print("try to find Barcode: "+barcode);
-				try{
+
 					Article tempArticle = articleList.lookupArticleByBarcode(barcode);
 					DebugScreen.getInstance().print("ArticleFoundByBarcode: "+tempArticle.getMyDocument());
 					
@@ -137,13 +138,9 @@ public class Cart extends Observable {
 						quantity = Buffer.getInstance().posQuantityBuffer;
 					
 					this.addArticle(tempArticle, quantity);
-				}catch (Exception e) {
-					DebugScreen.getInstance().print("Article not found by Barcode: "+barcode);
-					//DebugScreen.getInstance().printStackTrace(e);
-					throw new Exception("Artikel nicht gefunden");
-				}	
-				
-				
+
+
+
 			} catch (Exception e) {
 				barcode = "";
 				DebugScreen.getInstance().print(e.getMessage());
@@ -207,7 +204,25 @@ public class Cart extends Observable {
 	private void addWeighArticle(CartArticle article) throws Exception {
 
 		DebugScreen.getInstance().print("addWeighArticle");
+
+		if(DeviceManager.getInstance().getScale() == null)
+			throw  new Exception("No scale found.");
+
+
+
+
 		DeviceManager.getInstance().getScale().weighArticle(article);
+
+
+		int i = 0;
+		while( DeviceManager.getInstance().getScale().getWeight() == 0){
+			TimeUnit.SECONDS.sleep(1);
+			if(i == 3)
+				break;
+			i++;
+		}
+
+
 
 		DebugScreen.getInstance().print("addWeighArticle 1");
 		Double saleprice = DeviceManager.getInstance().getScale().getCalculatedSalesprice();

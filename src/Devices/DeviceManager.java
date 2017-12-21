@@ -1,6 +1,7 @@
 package Devices;
 
 
+import tworunpos.Config;
 import tworunpos.DebugScreen;
 
 
@@ -24,7 +25,8 @@ public class DeviceManager {
 
 		try
 		{
-			ComScaleDialog06 scale = ComScaleDialog06.getInstance();
+			scale = ComScaleDialog06.getInstance();
+            DebugScreen.getInstance().print("-- Scale opened ("+ Config.getInstance().getScaleComPort()+")");
 
 		}
 		catch ( Exception e )
