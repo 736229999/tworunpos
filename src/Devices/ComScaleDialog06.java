@@ -55,7 +55,21 @@ public class ComScaleDialog06
     final static char ESC = 0x1B;
 
 
-
+    public static String errorCode00 = "kein Fehler";
+    public static String errorCode01 = "allgemeiner Waagenfehler";
+    public static String errorCode02 = "Waagenfehler 02";
+    public static String errorCode10 = "Waagenfehler 10";
+    public static String errorCode11 = "Waagenfehler 11";
+    public static String errorCode12 = "Waagenfehler 12";
+    public static String errorCode13 = "Waagenfehler 13";
+    public static String errorCode20 = "Waage nicht still genug!";
+    public static String errorCode21 = "Bitte Artikel erneut wiegen!";
+    public static String errorCode22 = "Waagenfehler 22";
+    public static String errorCode30 = "Mindestlast auflegen!";
+    public static String errorCode31 = "Waagenfehler: Unterlast (31)";
+    public static String errorCode32 = "Waagenfehler:Artikel zu schwer! (32)";
+    public static String errorCode33 = "Waagenfehler: Betrag zu groß!";
+    public static String errorCode34 = "Ungültiges Gewicht!";
 
 
     static OutputStream out1;
@@ -172,13 +186,6 @@ public class ComScaleDialog06
                         int d = getDValueOfString11(buffer);
                         int z1 = getZ1ValueOfString11(buffer);
                         int z2 = getZ2ValueOfString11(buffer);
-/*
-                        //todo remove this after debug
-                        if(z1 != 0 || z2 != 0){
-                            String send = getString1("222222");
-                            out1.write(send.getBytes());
-                            return;
-                        }*/
 
 
                         System.out.println("com: Send set 10");  //todo wants checksum - send set 10
@@ -195,19 +202,21 @@ public class ComScaleDialog06
                     }break;
 
                     case 2:{
-                        System.out.println("Weight data arrived. processing...");
+                        System.out.println("02 - Weight data arrived. processing...");
 
                         //parse Status from result
                         char statusTmp = (char)(0x00 | (buffer[1] << 4));
                         statusTmp = (char)(statusTmp | buffer[2]);
                         scaleStatus =  hexToInt(statusTmp);
+                        System.out.println("scaleStatus: "+scaleStatus);
+
 
                         //parse weight from result
                         String weighFromScale= (new String(buffer)).toString().substring(7,11);
                         weight = Double.parseDouble(weighFromScale)/1000;
 
                         //parse baseprice from result
-                        String basePriceFromScale = (new String(buffer)).toString().substring(12,18);
+                        String basePriceFromScale = (new String(buffer)).toString().substring(13,18);
                         baseprice = Double.parseDouble(basePriceFromScale)/100;
 
                         //parse salesprice from result
@@ -222,26 +231,24 @@ public class ComScaleDialog06
                     }break;
 
                     case 9: {
-                        System.out.println("09: status information");
-                        char statusTmp = (char)(0x00 | (buffer[4] << 4));
-                        statusTmp = (char)(statusTmp | buffer[5]);
-                        statusCode =  hexToInt(statusTmp);
+                        statusCode = getStatusCodeFromString09(buffer);
+                        System.out.println("statusCode: "+statusCode);
 
-                    }break; //todo print info
+                    }break;
 
                     //ACK - checksum was correct - get calculation
                     case 98: System.out.println("get calculation");
                         String send = getStringToGetCalculation();
                         out1.write(send.getBytes());
-                    ;break; //todo print info
+                    ;break;
 
                     //NAK - failure - please get the error -> break into default
-                    case 99: System.out.println("get status information"); //todo print info
+                    case 99: System.out.println("get status information");
                     default : {
 
                         out1.write(getString8().getBytes());
                         System.out.print("com: Ask for status");
-                    }break; //todo NAK / error - ask for statusinfo with set 08
+                    }break;
                 }
 
             }
@@ -405,6 +412,25 @@ public class ComScaleDialog06
         else
             throw new Exception("Incoming string not well formed: "+string);
     }
+
+
+    //extrahiere satznummer des empfangenen strings
+    private static int  getStatusCodeFromString09(byte[] string) throws Exception {
+        if(string.length >= 3){
+
+            char [] charArray = new char[string.length];
+            for(int i = 0; i < string.length; i++){
+                charArray[i] = (char)string[i];
+            }
+
+            int result =           Rotate.charArrayToInt(charArray,4,5);
+
+            return result;
+        }
+        else
+            throw new Exception("Incoming string not well formed: "+string);
+    }
+
 
     //extract value Z (int) of string 11
     private static int  getZ1ValueOfString11(byte[] string) throws Exception {

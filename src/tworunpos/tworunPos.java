@@ -157,7 +157,7 @@ public class tworunPos extends JFrame {
 
 		
 
-	/*
+
 		
 		//listen to all keystrokes for commands e.g. barcodes from scanner
 		//textfieldOne.addKeyListener(this);
@@ -214,7 +214,7 @@ public class tworunPos extends JFrame {
 	                }
 	                return false;
 	       }
-	    });*/
+	    });
 		
 		
 //		state.changeState(PosState.posStateReady);
@@ -269,22 +269,30 @@ public class tworunPos extends JFrame {
 			@Override
 			public void update(Observable o, Object arg) {
 				DebugScreen.getInstance().print("update from cart");
+
+
+
+
 				
 				//arg 0 is the action we want to do
 				//arg 1 is the object we want to handle
 				Object[] args = (Object[])arg;
 				if(args[0] == "add"){
+
+					CartArticle cartArticle = (CartArticle)args[1];
+
 					//füge article der artikelliste der hauptanwendung hinzu
-					addArticleToTable((CartArticle)args[1]);
-					display.showArticleOnDisplayForSale(((CartArticle)args[1]).getQuantity(),(CartArticle)args[1],cart);
+					addArticleToTable(cartArticle);
+					display.showArticleOnDisplayForSale(((CartArticle)args[1]).getQuantity(),cartArticle,cart);
 					state.changeStateToSellingProcess(false);
 					
 				}else if(args[0] == "removeByArticleWithNotification"){
+
+					CartArticle cartArticle = (CartArticle)args[1];
+
 					//f�ge artikel als "minusartikel" in die liste hinzu
-					CartArticle article = (CartArticle)args[1];
-			
 					addArticleToTable((CartArticle)args[1]);
-					display.showArticleOnDisplayForCancellation(1,article,cart);
+					display.showArticleOnDisplayForCancellation(1,cartArticle,cart);
 					
 					PosState.getInstance().changeStateToSellingProcess(false);
 					
@@ -299,7 +307,7 @@ public class tworunPos extends JFrame {
 					state.changeStateToSellingProcess(false);
 					
 				}else if(args[0] == "drop"){
-					
+					//todo drop whole cart
 
 				}
 			}
@@ -515,7 +523,7 @@ public class tworunPos extends JFrame {
 				article.getUnit(),
 				article.getName(),
 				article.getPriceGross(),
-				article.getQuantity()*article.getPriceGross(),
+				article.getPriceGrossTotal(),
 				(!article.isDeposit() ||  (article.isDeposit() && article.isRefund()) ? gui.getIconDelete(): "")
 		};
 		

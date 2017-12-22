@@ -9,6 +9,7 @@ public class CartArticle extends Article{
 	private Boolean isRefund = false;
 	private char letterIdOfTaxGroup ;
 	private float quantity = 1;
+	private Double priceGrossTotal;
 
 
 	public CartArticle() {
@@ -51,9 +52,15 @@ public class CartArticle extends Article{
 	}
 
 	public Double getPriceGrossTotal(){
-		return quantity*this.getPriceGross();
+		if (priceGrossTotal == null)
+				return quantity*this.getPriceGross();
+		return priceGrossTotal;
 	}
-	
+
+	public void setPriceGrossTotal(Double priceGrossTotal) {
+		this.priceGrossTotal = priceGrossTotal;
+	}
+
 	public Double getVatAmountTotal(){
 		return quantity*this.getVatAmount();
 	}

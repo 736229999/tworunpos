@@ -201,39 +201,38 @@ public class Cart extends Observable {
 	}
 
 	//this method adds an usual article to the cart
-	private void addWeighArticle(CartArticle article) throws Exception {
+	private void addWeighArticle(CartArticle article) throws  Exception{
 
 		DebugScreen.getInstance().print("addWeighArticle");
 
-		if(DeviceManager.getInstance().getScale() == null)
-			throw  new Exception("No scale found.");
+            if(DeviceManager.getInstance().getScale() == null)
+                throw new DeviceException("No scale found.");
 
 
-
-
-		DeviceManager.getInstance().getScale().weighArticle(article);
+        DeviceManager.getInstance().getScale().weighArticle(article);
 
 
 		int i = 0;
+
+		//wait until scale is processing.  if no data is arried after 1,5 seconds, try to get statusinformation of scale
 		while( DeviceManager.getInstance().getScale().getWeight() == 0){
-			TimeUnit.SECONDS.sleep(1);
+			//TimeUnit.SECONDS.sleep(1);
+			Thread.sleep(500);
 			if(i == 3)
-				break;
+				throw new DeviceException(DeviceManager.getInstance().getScale().getStatusCode().toString());
 			i++;
 		}
 
 
 
-		DebugScreen.getInstance().print("addWeighArticle 1");
-		Double saleprice = DeviceManager.getInstance().getScale().getCalculatedSalesprice();
 
-		DebugScreen.getInstance().print("addWeighArticle 2");
 		Double weight = DeviceManager.getInstance().getScale().getWeight();
-
-		DebugScreen.getInstance().print("addWeighArticle 3");
 		article.setQuantity(new Float(weight));
-		DebugScreen.getInstance().print("addWeighArticle 4");
-		article.setPriceGross(saleprice);
+
+		Double saleprice = DeviceManager.getInstance().getScale().getCalculatedSalesprice();
+		article.setPriceGrossTotal(saleprice);
+
+
 		addSimpleArticle(article);
 	}
 	

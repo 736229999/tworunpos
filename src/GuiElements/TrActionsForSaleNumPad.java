@@ -1,5 +1,7 @@
 package GuiElements;
 
+import Devices.ComScaleDialog06;
+import Exceptions.DeviceException;
 import tworunpos.Article;
 import tworunpos.ArticleList;
 import tworunpos.Buffer;
@@ -130,7 +132,32 @@ public class TrActionsForSaleNumPad extends JPanel {
 				Article tempArticle = articleList.lookupArticleByBarcode(barcode);
 				DebugScreen.getInstance().print("ArticleFoundByBarcode: "+tempArticle.getMyDocument());
 				cart.addArticle(tempArticle,Buffer.getInstance().getPosQuantityBuffer());
-			}catch (Exception e) {
+			}catch (DeviceException e){
+				System.out.println("Waagen Statuscode: "+e.getMessage()+" - "+Integer.parseInt(e.getMessage()));
+				String message = "undefiniertes Waagenresultat";
+				switch(Integer.parseInt(e.getMessage())){
+					case 0: message = ComScaleDialog06.errorCode00;break;
+					case 1: message = ComScaleDialog06.errorCode01;break;
+					case 2: message = ComScaleDialog06.errorCode02;break;
+					case 10: message = ComScaleDialog06.errorCode10;break;
+					case 11: message = ComScaleDialog06.errorCode11;break;
+					case 12: message = ComScaleDialog06.errorCode12;break;
+					case 13: message = ComScaleDialog06.errorCode13;break;
+					case 20: message = ComScaleDialog06.errorCode20;break;
+					case 21: message = ComScaleDialog06.errorCode21;break;
+					case 22: message = ComScaleDialog06.errorCode22;break;
+					case 30: message = ComScaleDialog06.errorCode30;break;
+					case 31: message = ComScaleDialog06.errorCode31;break;
+					case 32: message = ComScaleDialog06.errorCode32;break;
+					case 33: message = ComScaleDialog06.errorCode33;break;
+					case 34: message = ComScaleDialog06.errorCode34;break;
+				}
+
+
+
+				display.showSimpleTextOnDisplay(message);
+			}
+			catch (Exception e) {
 				DebugScreen.getInstance().print("Article not found by Barcode: "+barcode);
 				DebugScreen.getInstance().printStackTrace(e);
 				display.showSimpleTextOnDisplay("Artikel nicht gefunden");
@@ -182,7 +209,10 @@ public class TrActionsForSaleNumPad extends JPanel {
 					Article tempArticle = articleList.lookupArticlebyPlu(one);
 					DebugScreen.getInstance().print("Article found by PLU: "+tempArticle.getMyDocument());
 					cart.addArticle(tempArticle, Buffer.getInstance().getPosQuantityBuffer());
-				}catch (Exception e) {
+				}catch (DeviceException e){
+					display.showSimpleTextOnDisplay(e.getMessage());
+				}
+				catch (Exception e) {
 					DebugScreen.getInstance().print("Article not found by PLU: "+one);
 					DebugScreen.getInstance().printStackTrace(e);
 					display.showSimpleTextOnDisplay("PLU nicht gefunden");
