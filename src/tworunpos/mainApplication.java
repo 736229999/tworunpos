@@ -99,6 +99,7 @@ public class mainApplication {
 			deviceManager = DeviceManager.getInstance();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
+			debug.print(e1.getMessage());
 			e1.printStackTrace();
 		}
 

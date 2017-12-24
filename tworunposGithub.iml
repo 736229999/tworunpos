@@ -9,5 +9,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="Epsonlib" level="project" />
+    <orderEntry type="library" name="portcommunicationservice" level="project" />
+    <orderEntry type="library" name="SetupPOSD" level="project" />
   </component>
 </module>

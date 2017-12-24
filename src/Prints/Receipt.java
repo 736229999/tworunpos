@@ -167,7 +167,9 @@ public class Receipt implements Print {
 			middleStringMaxSize = (charWidth/2)-(leftStringMaxSize+rightStringMaxSize);
 			middleStringMaxSize = (middleStringMaxSize<0?0:middleStringMaxSize);
 		}
-		
+		else {
+			fontType = ESC +"|1C";
+		}
 		
 		
 		
@@ -242,6 +244,8 @@ public class Receipt implements Print {
 			fontType = ESC + "|bC"; 
 		}else if(type=="big"){
 			fontType = ESC + "|4C";
+		}else {
+			fontType = ESC +"|1C";
 		}
 		
 		endString = fontType+string1+string2+string3+string4+LF;
@@ -312,15 +316,15 @@ public class Receipt implements Print {
 	
 	
 	public String horizontalRule(){
-		String hr = horizontalRuleSign;
+		String hr = ESC +"|1C"+horizontalRuleSign;
 		for(int i = 1; i < charWidth; i++){
 			hr += horizontalRuleSign;
 		}
 		hr += LF;
-		
+
 		return hr;
 	}
-	
+
 	public String getHead(){
 
 		if(head != ""){

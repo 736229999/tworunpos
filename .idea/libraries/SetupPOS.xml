@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SetupPOS">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/lib/Epson/SetupPOS" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://$PROJECT_DIR$/lib/Epson/SetupPOS" />
+    </NATIVE>
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/Epson/SetupPOS" recursive="false" />
+  </library>
+</component>

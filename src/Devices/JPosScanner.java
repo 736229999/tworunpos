@@ -5,24 +5,23 @@ import jpos.JposException;
 import jpos.POSPrinter;
 import jpos.POSPrinterConst;
 
-public class JPosPrinter extends JPosDevice implements JPosDeviceInterface {
+public class JPosScanner extends JPosDevice implements JPosDeviceInterface {
 
-	
-    private POSPrinter ptr;
-    
+
+    private POSPrinter ptr = new POSPrinter();
+
     // constants defined for convience sake (could be inlined)
     private String ESC    = ((char) 0x1b) + "";
     private String LF     = ((char) 0x0a) + "";
     private String SPACES = "                                                                      ";
-          
-    
-    
-	
-	public JPosPrinter(String deviceName) {
+
+
+
+
+	public JPosScanner(String deviceName) {
 		super();
 		//close first
 		//this.close();
-		ptr = new POSPrinter();
 		this.open(deviceName);
 		//this.printDemo();
 	}

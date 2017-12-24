@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Epson">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/lib/Epson" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/Epson" recursive="false" />
+  </library>
+</component>

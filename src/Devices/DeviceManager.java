@@ -1,6 +1,7 @@
 package Devices;
 
 
+import jpos.util.JposPropertiesConst;
 import tworunpos.Config;
 import tworunpos.DebugScreen;
 
@@ -19,8 +20,8 @@ public class DeviceManager {
 
 	
 	public DeviceManager() throws Exception {
-		//System.setProperty("jpos.config.populatorFile", "jpos.xml");
-		//System.setProperty(JposPropertiesConst.JPOS_POPULATOR_FILE_PROP_NAME, "jpos.xml");
+		System.setProperty("jpos.config.populatorFile", "jpos.xml");
+		System.setProperty(JposPropertiesConst.JPOS_POPULATOR_FILE_PROP_NAME, "jpos.xml");
 
 
 		try
@@ -36,9 +37,12 @@ public class DeviceManager {
 		}
 
 
-//		printer = new JPosPrinter("POSPrinter");
+
+
+
 		//printer = new JPosPrinter("POSPrinter");
-		//printer.makeDemo();
+		printer = new JPosPrinter("POSPrinter");
+		printer.makeDemo();
 //		lineDisplay = new JLineDisplay("WN_BA63_USB");
 //		lineDisplay.makeDemo();
 	}
