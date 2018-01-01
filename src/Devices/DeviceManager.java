@@ -39,13 +39,13 @@ public class DeviceManager {
 
         if(config.isScannerActive()) {
             DebugScreen.getInstance().print("-- opening scanner");
-            scanner = new JPosScanner("DLS-Magellan-RS232-Scanner");
+            scanner = new JPosScanner(config.getScannerName());
             DebugScreen.getInstance().print("-- scanner opened");
         }
 
         if(config.isPrinterActive()) {
             DebugScreen.getInstance().print("-- opening printer");
-            printer = new JPosPrinter("POSPrinter");
+            printer = new JPosPrinter(config.getPrinterName());
             DebugScreen.getInstance().print("-- printer opened");
         }
 	}

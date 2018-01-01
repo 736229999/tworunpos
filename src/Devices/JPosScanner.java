@@ -84,7 +84,15 @@ public class JPosScanner extends JPosDevice implements JPosDeviceInterface  {
 		}
         
 	}
-	
+
+	public void enable() throws JposException {
+        scanner.setDeviceEnabled(true);
+    }
+
+	public void disable() throws JposException {
+		scanner.setDeviceEnabled(false);
+	}
+
 	public void close(){
 		super.close();
 		// close the Printer and CashDrawer object

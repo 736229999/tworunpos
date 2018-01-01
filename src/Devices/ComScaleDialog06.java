@@ -108,7 +108,6 @@ public class ComScaleDialog06
                 SerialPort serialPort = (SerialPort) commPort;
                 serialPort.setSerialPortParams(9600,SerialPort.DATABITS_7,SerialPort.STOPBITS_1,SerialPort.PARITY_ODD);
 
-                System.out.println("COM3 Port offen");
                 InputStream in = serialPort.getInputStream();
                 OutputStream out = serialPort.getOutputStream();
 
@@ -121,7 +120,7 @@ public class ComScaleDialog06
             }
             else
             {
-                System.out.println("Error: Only serial ports are handled by this example.");
+                System.out.println("Error: Only serial ports are handled.");
             }
         }
     }

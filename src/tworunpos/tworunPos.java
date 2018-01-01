@@ -137,11 +137,13 @@ public class tworunPos extends JFrame {
 		state.addObserver(new stateObserver());
 
         //add observer to scanner
-        try {
-            DeviceManager.getInstance().getScanner().getScannerNotifier().addObserver(new ScannerObserver());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		if(config.isScannerActive()){
+			try {
+				DeviceManager.getInstance().getScanner().getScannerNotifier().addObserver(new ScannerObserver());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
 
         //----------------- LOGIN
@@ -154,7 +156,7 @@ public class tworunPos extends JFrame {
         while(!salesUser.loggedIn()){};
 
 		//------------------ZSession
-		//initZSession();
+		initZSession();
 
 		setTitle(frameTitle);
 		createMainGui();
@@ -243,7 +245,7 @@ public class tworunPos extends JFrame {
 		zSessionList = new ZSessionList();
 		try {
 			openZSession = zSessionList.getOpenZSession();
-			GuiElements.displayInfoMessageBox("Z-No: "+openZSession.getCounter());
+			//GuiElements.displayInfoMessageBox("Z-No: "+openZSession.getCounter());
 		} catch (ZSessionException e) {
 			GuiElements.displayInfoMessageBox("Z-Fehler: "+e.getMessage());
 
@@ -262,7 +264,7 @@ public class tworunPos extends JFrame {
 
 				if(action == "login"){
 					salesUser.login(loginmask.getInputValue());
-					initZSession();
+
                     //close the loginscreen and continue with sale screen
                     loginmask.setVisible(false); //you can't see me!
                     loginmask.dispose(); //Destroy the JFrame object
@@ -1052,8 +1054,16 @@ public class tworunPos extends JFrame {
 		
 		//clean all price displays
 		display.clearDisplay();
-		
-	
+
+		//make the scanner ready
+		if(config.isScannerActive()){
+			try {
+				DeviceManager.getInstance().getScanner().enable();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		//cleear the textfield for plu
 		textfieldOne.setValue(null);
 		
@@ -1171,6 +1181,17 @@ public class tworunPos extends JFrame {
 			TrDisplayForCashier.getInstance().clearDisplay();
 			//showSimpleTextOnDisplay("");
 		}
+
+
+		//make the scanner ready
+		if(config.isScannerActive()){
+			try {
+				DeviceManager.getInstance().getScanner().disable();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 
 		//clear the barcode buffer
 		barcodeBuffer = "";
