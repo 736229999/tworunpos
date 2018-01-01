@@ -1,18 +1,38 @@
 {
 	"debugMode":true,
-	"mongoDbLocation":"C:\Program Files\MongoDB\Server\3.4\bin",
-	"importFileType":"default",
+	"mongoDbLocation":"C:\Program Files\MongoDB\Server\3.2\\bin\mongod.exe",
 	"currencySymbol":"€",
+	"currencySymbolLatin":"EUR",
+	"currencyName":"Euro",
 	"useCurrencySymbolOnReceipt":false,
-	"useCurrencyNameOnReceipt":false,
+	"useCurrencyNameOnReceipt":true,
 	"devices":	{
 					"printer":{
+					    "active":true,
+					    "protocol":"javapos",
 						"name":"POSPrinter",
 						"printerLineWidth":80
+						"port":"USB"
 					},
 					"lineDisplay":{
+					    "active":false,
+					    "protocol":"javapos",
 						"name":"WN_BA63_USB"
-					}
+						"port":"USB"
+					},
+                    "scanner":{
+                        "active":true,
+                        "protocol":"javapos",
+                        "name":"DLS-Magellan-RS232-Scanner"
+                        "port":"COM6"
+                    },
+                    "scale":{
+                        "active":true,
+                        "protocol":"dialog06",
+                        "name":"",
+                        "port":"COM3"
+                    }
+
 				},
 	"weighBarcodes":[28,29]
 }

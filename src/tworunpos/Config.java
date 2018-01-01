@@ -1,12 +1,15 @@
 package tworunpos;
 
 
+import Devices.ScannerTest;
+import com.mongodb.util.JSON;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -18,28 +21,15 @@ public class Config {
 
 	// Eine (versteckte) Klassenvariable vom Typ der eigene Klasse
 	private static Config instance;
-	// Verhindere die Erzeugung des Objektes �ber andere Methoden
-	//private Config() {}
-	// Eine Zugriffsmethode auf Klassenebene, welches dir '''einmal''' ein konkretes 
-	// Objekt erzeugt und dieses zur�ckliefert.
-	// Durch 'synchronized' wird sichergestellt dass diese Methode nur von einem Thread 
-	// zu einer Zeit durchlaufen wird. Der n�chste Thread erh�lt immer eine komplett 
-	// initialisierte Instanz.
+
 	
 	
-	
-	
-	
-    public static String configFileDirectory = "/resources/config/";
+    public static String configFileDirectory = "\\resources\\config\\";
 	public static String configFilename = "config.trn";
 	
 	
 
 
-	//The filetype of the file, which contains the product informations from erp system
-	public String importFileType;
-	public static String importFileTypeDefault = "default";
-	public static String importFileTypeMyaSoft = "myasoft";
 	
 	//If the debugscreen (output of debuginfos) should appear or not
 	public Boolean debugMode = true;
@@ -49,13 +39,13 @@ public class Config {
 	
 	//The currency Smybol to use for printouts etc
 	private String currencySmybol = "€";
-	private String currencyName = "EUR";
+    private String currencySymbolLatin = "EUR";
+	private String currencyName = "EURO";
 	private boolean useCurrencySymbolOnReceipt = false;
 	private boolean useCurrencyNameOnReceipt = false;
-	
-	
 	private String[] weighItems =  new String[10];
 
+    private JSONObject devices;
 
 
 	private  String scaleComPort = "COM3";
@@ -64,32 +54,14 @@ public class Config {
 	public Config() throws IOException {
 		try {
 			// read the json file
+            JSONParser parser = new JSONParser();
 
-			System.out.println("Cannot read file. " + this.getClass().getResource("resources/config/config.trn").getFile());
 
-			File file = new File(this.getClass().getResource("config/config.trn").getFile());
-			StringBuilder result = new StringBuilder();
-			try (Scanner scanner = new Scanner(file)) {
-				 
-				while (scanner.hasNextLine()) {
-					String line = scanner.nextLine();
-					result.append(line).append("\n");
-				}
+            String filePath = new File("").getAbsolutePath();
+            filePath = filePath.concat(configFileDirectory+configFilename);
+            Object object = parser.parse(new FileReader(filePath));
+            JSONObject jsonObject = (JSONObject)object;
 
-				scanner.close();
-		 
-			} catch (IOException e) {
-
-				e.printStackTrace();
-			}
-			
-			JSONParser jsonParser = new JSONParser();
-			JSONObject jsonObject = null;
-			if(result != null){
-				jsonObject = ((JSONObject) jsonParser.parse(result.toString()));
-			}else{
-				System.out.println("Cannot read file. " + Config.configFilename);
-			}
 
 			// get debugmode
 			Boolean json_debugMode = (Boolean) jsonObject.get("debugMode");
@@ -97,22 +69,20 @@ public class Config {
 			
 			
 			// get path of mongodb
-			String json_mongoDbLocation = (String) jsonObject.get("mongoDbLocation");
+			String json_mongoDbLocation =  jsonObject.get("mongoDbLocation").toString();
 			mongoDbLocation = json_mongoDbLocation;
 			
-			// get the type of import  file for items
-			String json_importFileType = (String) jsonObject.get("importFileType");
-			if(json_importFileType.equalsIgnoreCase(importFileTypeDefault))
-				setImportFileType(importFileTypeDefault);
-			else if(json_importFileType.equalsIgnoreCase(importFileTypeMyaSoft))
-				setImportFileType(importFileTypeMyaSoft);
-
 
 			// get currency symbol
 			String json_currencySmybol = (String) jsonObject.get("currencySymbol");
 			if(json_currencySmybol != null)
 				currencySmybol = json_currencySmybol;
-			
+
+            // get currency symbol Latin
+            String json_currencySymbolLatin = (String) jsonObject.get("currencySymbolLatin");
+            if(json_currencySymbolLatin != null)
+                currencySymbolLatin = json_currencySymbolLatin;
+
 			// get currency Name
 				String json_currencyName = (String) jsonObject.get("currencyName");
 				if(json_currencyName != null)
@@ -134,16 +104,17 @@ public class Config {
 				if(json_weighBarcodes.size() > 0)
 				{
 					for (int i = 0; i < json_weighBarcodes.size(); i++) {
-						System.out.println("Found WeighBarcode into Config: "+json_weighBarcodes.get(i)+"  i:"+i+"   size:"+json_weighBarcodes.size());
+						System.out.println("Found WeighBarcode in Config: "+json_weighBarcodes.get(i)+"  i:"+i+"   size:"+json_weighBarcodes.size());
 						weighItems[i] =json_weighBarcodes.get(i).toString() ;
-						System.out.println("Read WeighBarcode into Config: "+this.weighItems[i]);
+						System.out.println("Read WeighBarcode in Config: "+this.weighItems[i]);
 					}
 				}
 
-				//todo remove when read from json
-				weighItems[0] = "28";
+				//parse config for devices
+                devices = (JSONObject)jsonObject.get("devices")  ;
 
-		
+
+
 		} catch (ParseException ex) {
 			ex.printStackTrace();
 		} catch (NullPointerException ex) {
@@ -151,16 +122,67 @@ public class Config {
 		}
 
 	}
-	
-	public String getImportFileType() {
-		return importFileType;
+
+
+	public Boolean isLineDisplayActive(){
+        return isDeviceActive("lineDisplay");
+    }
+
+    public Boolean isPrinterActive(){
+        return isDeviceActive("printer");
+    }
+
+
+    public Boolean isScaleActive(){
+        return isDeviceActive("scale");
+    }
+
+
+    public Boolean isScannerActive(){
+        return isDeviceActive("scanner");
+    }
+
+    private boolean isDeviceActive(String device){
+	    boolean tmp = (boolean) ((JSONObject) devices.get(device)).get("active");
+	    if(tmp == true)
+            return  true;
+	    else
+	        return false;
 	}
 
-	public void setImportFileType(String importFileType) {
-		this.importFileType = importFileType;
-	}
+    //get procols of devices
+    public String getScannerProtocol(){return getDeviceProtocol("scanner");}
+    public String getPrinterProtocol(){return getDeviceProtocol("printer");}
+    public String getLineDisplayProtocol(){return getDeviceProtocol("linedisplay");}
+    public String getScaleProtocol(){return getDeviceProtocol("scale");}
+    private String getDeviceProtocol(String device){
+        String tmp = (String) ((JSONObject) devices.get(device)).get("protocol");
+        return tmp;
+    }
 
-	public Boolean getDebugMode() {
+
+    //get name of devices
+    public String getScannerName(){return getDeviceName("scanner");}
+    public String getPrinterName(){return getDeviceName("printer");}
+    public String getLineDisplayName(){return getDeviceName("linedisplay");}
+    public String getScaleName(){return getDeviceName("scale");}
+    private String getDeviceName(String device){
+        String tmp = (String) ((JSONObject) devices.get(device)).get("name");
+        return tmp;
+    }
+
+
+    //get port of devices
+    public String getScannerPort(){return getDevicePort("scanner");}
+    public String getPrinterPort(){return getDevicePort("printer");}
+    public String getLineDisplayPort(){return getDevicePort("linedisplay");}
+    public String getScalePort(){return getDevicePort("scale");}
+    private String getDevicePort(String device){
+        String tmp = (String) ((JSONObject) devices.get(device)).get("port");
+        return tmp;
+    }
+
+    public Boolean getDebugMode() {
 		return debugMode;
 	}
 	
@@ -235,7 +257,26 @@ public class Config {
 	}
 
 
-	
-	
+
+    //for testing
+    public static void main ( String[] args )
+    {
+
+
+        try
+        {
+
+
+            Config config =  Config.getInstance();
+
+
+        }
+        catch ( Exception e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
 
 }

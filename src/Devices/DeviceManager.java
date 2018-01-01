@@ -8,7 +8,7 @@ import jpos.events.DataListener;
 import jpos.util.JposPropertiesConst;
 import tworunpos.Config;
 import tworunpos.DebugScreen;
-
+import tworunpos.GuiElements;
 
 
 public class DeviceManager {
@@ -29,36 +29,25 @@ public class DeviceManager {
 		System.setProperty("jpos.config.populatorFile", "jpos.xml");
 		System.setProperty(JposPropertiesConst.JPOS_POPULATOR_FILE_PROP_NAME, "jpos.xml");
 
+        Config config = Config.getInstance();
 
-		try
-		{
-			DebugScreen.getInstance().print("-- opening scale");
-			scale = ComScaleDialog06.getInstance();
-            DebugScreen.getInstance().print("-- scale opened ("+ Config.getInstance().getScaleComPort()+")");
+		if(config.isScaleActive()) {
+            DebugScreen.getInstance().print("-- opening scale");
+            scale = ComScaleDialog06.getInstance();
+            DebugScreen.getInstance().print("-- scale opened (" + Config.getInstance().getScaleComPort() + ")");
+        }
 
-		}
-		catch ( Exception e )
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        if(config.isScannerActive()) {
+            DebugScreen.getInstance().print("-- opening scanner");
+            scanner = new JPosScanner("DLS-Magellan-RS232-Scanner");
+            DebugScreen.getInstance().print("-- scanner opened");
+        }
 
-		DebugScreen.getInstance().print("-- opening scanner");
-		//printer = new JPosPrinter("POSPrinter");
-		scanner = new JPosScanner("DLS-Magellan-RS232-Scanner");
-		DebugScreen.getInstance().print("-- scanner opened");
-
-
-
-		//printer = new JPosPrinter("POSPrinter");
-		DebugScreen.getInstance().print("-- opening printer");
-		printer = new JPosPrinter("POSPrinter");
-		printer.makeDemo();
-		DebugScreen.getInstance().print("-- printer opened");
-
-
-//		lineDisplay = new JLineDisplay("WN_BA63_USB");
-//		lineDisplay.makeDemo();
+        if(config.isPrinterActive()) {
+            DebugScreen.getInstance().print("-- opening printer");
+            printer = new JPosPrinter("POSPrinter");
+            DebugScreen.getInstance().print("-- printer opened");
+        }
 	}
 	
 	

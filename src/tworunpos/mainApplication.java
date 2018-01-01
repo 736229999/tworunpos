@@ -99,6 +99,7 @@ public class mainApplication {
 			deviceManager = DeviceManager.getInstance();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
+            GuiElements.displayErrorMessageBox(e1.getMessage());
 			debug.print(e1.getMessage());
 			e1.printStackTrace();
 		}
@@ -143,7 +144,7 @@ public class mainApplication {
 		 */
 		splashScreen.setText("Starting Main App ...");
 		splashScreen.dispose();
-		mainApplikation =  new tworunPos("tworunPOS 0.1", db, DataImporter, articleList, config, debug);
+		mainApplikation =  new tworunPos("tworunPOS 0.9", db, DataImporter, articleList, config, debug);
 		mainApplikation.show();
 		
 	}
