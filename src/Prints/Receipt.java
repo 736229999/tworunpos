@@ -372,7 +372,7 @@ public class Receipt implements Print {
 		
 		
 		int twoColumnsWidth = charWidth/2;
-		footer1 += createNewFullLine("Datum", twoColumnsWidth, twoColumnsWidth, "Kasse", twoColumnsWidth, twoColumnsWidth, "normal");
+		footer1 = createNewFullLine("Datum", twoColumnsWidth, twoColumnsWidth, "Kasse", twoColumnsWidth, twoColumnsWidth, "normal");
 		
 		Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("d.M.y HH:mm:ss");
