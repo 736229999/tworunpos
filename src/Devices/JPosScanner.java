@@ -1,100 +1,66 @@
 package Devices;
 
+import Exceptions.DeviceException;
 import Prints.Receipt;
 import jpos.JposException;
 import jpos.POSPrinter;
 import jpos.POSPrinterConst;
+import jpos.Scanner;
+import jpos.events.DataEvent;
+import jpos.events.DataListener;
+import tworunpos.DebugScreen;
 
-public class JPosScanner extends JPosDevice implements JPosDeviceInterface {
+import java.util.Observable;
+import java.util.Observer;
+
+public class JPosScanner extends JPosDevice implements JPosDeviceInterface  {
 
 
-    private POSPrinter ptr = new POSPrinter();
 
+
+
+
+    private Scanner scanner;
+    private ScannerNotifier scannerNotifier;
     // constants defined for convience sake (could be inlined)
     private String ESC    = ((char) 0x1b) + "";
     private String LF     = ((char) 0x0a) + "";
     private String SPACES = "                                                                      ";
 
+    private DataListener myListener;
 
 
-
-	public JPosScanner(String deviceName) {
+	public JPosScanner(String deviceName) throws JposException {
 		super();
 		//close first
-		//this.close();
+		this.close();
+
+        scanner = new Scanner();
 		this.open(deviceName);
-		//this.printDemo();
+
+        scannerNotifier = new ScannerNotifier();
+        scanner.addDataListener(scannerNotifier);
+
 	}
+
+
 	
-	public void print(String stringToPrint){
+	public String scan() throws DeviceException {
+		String scanData = "";
 		try{
 			
-			// begining a transaction
-			// This transaction mode causes all output to be buffered			
-			ptr.transactionPrint(POSPrinterConst.PTR_S_RECEIPT, POSPrinterConst.PTR_TP_TRANSACTION);
-			
-			ptr.printNormal(POSPrinterConst.PTR_S_RECEIPT, stringToPrint);
-			 //   after feeding to the cutter position
-	        ptr.printNormal(POSPrinterConst.PTR_S_RECEIPT, ESC + "|100fP");
+			scanData = new String(scanner.getScanData());
 
-			// terminate the transaction causing all of the above buffered data to be sent to the printer
-			ptr.transactionPrint(POSPrinterConst.PTR_S_RECEIPT, POSPrinterConst.PTR_TP_NORMAL);
 		}catch(JposException e){
-			
+			DebugScreen.getInstance().printStackTrace(e);
+			throw new DeviceException(e.getMessage());
 		}
-		
+		return scanData;
 	}
 	
 	
 	
-	
-	public void makeDemo()  {
 
-		/* this amthod does some prints on the device to see if everything works well.
-		e.g. this method is executeable during the development or when starting the application
-		 */
-
-		try{
-			// check if the cover is open
-			if (ptr.getCoverOpen() == true)
-			{
-				// cover open so do not attempt printing
-				throw new Exception("Cover Open");
-			}
-	            
-			// check if the printer is out of paper
-			if (ptr.getRecEmpty() == true)
-			{
-				// the printer is out of paper so do not attempt printing
-				throw new Exception("Printer out of Paper");
-			}
-	            
-			// begining a transaction
-			// This transaction mode causes all output to be buffered
-			ptr.transactionPrint(POSPrinterConst.PTR_S_RECEIPT, POSPrinterConst.PTR_TP_TRANSACTION);
-
-			
-			//create transactionprint
-			  //get an Iterator object for Vector using iterator() method.
-			
-			Receipt testReceipt = new Receipt();
-			testReceipt.addNewSimpleLineToBody("--- tworun POS ---");
-
-			
-			
-			ptr.printNormal(POSPrinterConst.PTR_S_RECEIPT, testReceipt.toString());
-
-            // the ESC + "|100fP" control code causes the printer to execute a paper cut
-            //   after feeding to the cutter position
-            ptr.printNormal(POSPrinterConst.PTR_S_RECEIPT, ESC + "|100fP");
-	
-			// terminate the transaction causing all of the above buffered data to be sent to the printer
-			ptr.transactionPrint(POSPrinterConst.PTR_S_RECEIPT, POSPrinterConst.PTR_TP_NORMAL);
-
-		}catch(Exception e){
-			
-		}
-	}
 	
 	
 	public void open(String deviceName){
@@ -103,13 +69,15 @@ public class JPosScanner extends JPosDevice implements JPosDeviceInterface {
 		super.open();
         try
         {
-			// To test Printer
-			ptr.open(deviceName);
-			ptr.claim(1000);
-			ptr.setDeviceEnabled(true);
-	            
-			//Output by the high quality mode
-			ptr.setRecLetterQuality(true);
+
+			//scanner.addDataListener(this);
+			// Initialize the scanner. Exception thrown if a method fails.
+			scanner.open(deviceName);
+			scanner.claim(1000);
+			scanner.setDeviceEnabled(true);
+			scanner.setDataEventEnabled(true);
+
+
 		
         }catch(JposException e){
 			e.printStackTrace();
@@ -121,16 +89,57 @@ public class JPosScanner extends JPosDevice implements JPosDeviceInterface {
 		super.close();
 		// close the Printer and CashDrawer object
 		try{
-			ptr.setDeviceEnabled(false);
-			ptr.release();
-			ptr.close();
+			scanner.setDeviceEnabled(false);
+			scanner.release();
+			scanner.close();
 		}
 		catch (Exception e){
 			System.out.println(e.getMessage());
 		}
 	}
-	
-	
-	
+
+    public ScannerNotifier getScannerNotifier() {
+        return scannerNotifier;
+    }
+
+    public class ScannerNotifier extends Observable  implements DataListener  {
+
+		//for scanner
+		@Override
+		public void dataOccurred(DataEvent e) {
+
+		    //notifies observer
+            setChanged();
+
+			jpos.Scanner dc = (jpos.Scanner) e.getSource();
+
+
+            try {
+                String scanData = scan();
+
+                String Msg = "Scanner DataEvent (Status=" + e.getStatus() + ") received.\n Data: "+scanData;
+                System.out.println (Msg);
+
+                notifyObservers(scanData);
+            } catch (DeviceException e1) {
+                e1.printStackTrace();
+            }
+
+
+
+
+
+			try {
+				dc.setDataEventEnabled(true);
+			} catch (JposException event){}
+
+
+
+
+		}
+	}
+
+
+
 
 }

@@ -42,8 +42,10 @@ import javax.swing.table.TableModel;
 import javax.swing.JScrollPane;
 import javax.swing.border.LineBorder;
 
+import Devices.DeviceManager;
 import Exceptions.CounterException;
 import Exceptions.ZSessionException;
+import com.usb.core.Device;
 import org.apache.commons.lang.ArrayUtils;
 
 import Exceptions.CheckoutGeneralException;
@@ -131,9 +133,18 @@ public class tworunPos extends JFrame {
 		this.config = config;
 		this.debug = DebugScreen.getInstance();
 
+		//add observer to pos state
 		state.addObserver(new stateObserver());
 
-		//----------------- LOGIN
+        //add observer to scanner
+        try {
+            DeviceManager.getInstance().getScanner().getScannerNotifier().addObserver(new ScannerObserver());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        //----------------- LOGIN
 		this.salesUser = new User();
 		//start the loginmask to login; this method will stop the process here, until user logs in
 		state.changeStateToLogin(false);
@@ -261,6 +272,28 @@ public class tworunPos extends JFrame {
 
 				}
 			}
+		}
+
+
+
+		private class ScannerObserver implements Observer {
+
+
+			@Override
+			public void update(Observable o, Object arg) {
+
+			    String incomingBarcode =  arg.toString().replaceAll("\\D+","");
+
+                DebugScreen.getInstance().print(incomingBarcode);
+
+                //todo check quantity from keyboard
+                try {
+                    cart.addArticleByBarcode(incomingBarcode,1);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
 		}
 
 

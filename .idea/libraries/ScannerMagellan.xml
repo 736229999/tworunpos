@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="ScannerMagellan">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/Backup/ScannerMagellan" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://$PROJECT_DIR$/Backup/ScannerMagellan" />
+    </NATIVE>
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/Backup/ScannerMagellan" recursive="false" />
+  </library>
+</component>

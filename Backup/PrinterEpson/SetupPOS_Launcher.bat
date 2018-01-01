@@ -1,0 +1,1 @@
+powershell.exe -NoProfile -ExecutionPolicy unrestricted -Command "Start-Process SetupPOS.bat -Verb Runas"

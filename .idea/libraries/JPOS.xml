@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="JPOS">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/Backup/JPOS" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/Backup/JPOS" recursive="false" />
+  </library>
+</component>

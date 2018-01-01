@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SupportJars">
+    <CLASSES>
+      <root url="file://C:/Program Files/Datalogic/JavaPOS/SupportJars" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://C:/Program Files/Datalogic/JavaPOS/SupportJars" />
+    </NATIVE>
+    <SOURCES />
+    <jarDirectory url="file://C:/Program Files/Datalogic/JavaPOS/SupportJars" recursive="false" />
+  </library>
+</component>

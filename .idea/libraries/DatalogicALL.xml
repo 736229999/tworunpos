@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="DatalogicALL">
+    <CLASSES>
+      <root url="file://C:/Program Files/Datalogic/JavaPOS" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://C:/Program Files/Datalogic/JavaPOS/javadoc" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://C:/Program Files/Datalogic/JavaPOS" />
+    </SOURCES>
+    <jarDirectory url="file://C:/Program Files/Datalogic/JavaPOS" recursive="false" />
+  </library>
+</component>

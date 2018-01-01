@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="PrinterEpson">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/Backup/PrinterEpson" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://$PROJECT_DIR$/Backup/PrinterEpson" />
+    </NATIVE>
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/Backup/PrinterEpson" recursive="false" />
+  </library>
+</component>
