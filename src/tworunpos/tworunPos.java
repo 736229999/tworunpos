@@ -45,7 +45,6 @@ import javax.swing.border.LineBorder;
 import Devices.DeviceManager;
 import Exceptions.CounterException;
 import Exceptions.ZSessionException;
-import com.usb.core.Device;
 import org.apache.commons.lang.ArrayUtils;
 
 import Exceptions.CheckoutGeneralException;

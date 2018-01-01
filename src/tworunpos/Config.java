@@ -203,9 +203,13 @@ public class Config {
 	public void setCurrencySymbol(String c) {
 		currencySmybol = c;
 	}
-	
 
-	public boolean isUseCurrencySymbolOnReceipt() {
+    public String getCurrencySymbolLatin() {return currencySymbolLatin;}
+
+    public String getCurrencyName() {return currencyName;}
+
+
+    public boolean isUseCurrencySymbolOnReceipt() {
 		return useCurrencySymbolOnReceipt;
 	}
 

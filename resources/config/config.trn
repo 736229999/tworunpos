@@ -1,11 +1,11 @@
 {
-	"debugMode":true,
+	"debugMode":false,
 	"mongoDbLocation":"C:\Program Files\MongoDB\Server\3.2\\bin\mongod.exe",
 	"currencySymbol":"€",
 	"currencySymbolLatin":"EUR",
 	"currencyName":"Euro",
 	"useCurrencySymbolOnReceipt":false,
-	"useCurrencyNameOnReceipt":true,
+	"useCurrencyNameOnReceipt":false,
 	"devices":	{
 					"printer":{
 					    "active":true,

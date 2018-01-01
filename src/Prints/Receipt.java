@@ -86,7 +86,8 @@ public class Receipt implements Print {
 	public Receipt() {
 		//currencySymbol = Config.getInstance().getCurrencySymbol();
 		//if(currencySymbol == "€")
-			currencySymbol = EURO;
+			currencySymbol = Config.getInstance().getCurrencySymbol();
+			currencyName = Config.getInstance().getCurrencySymbolLatin();
 	}
 
 
