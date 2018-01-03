@@ -121,8 +121,8 @@ public class TrNumPadSaleScreen extends TrNumPad {
 		});
 
 		JButton btnKeyPadDelete = new TrButtonHighlight("<<", new Dimension(), false);
-		btnKeyPadDelete.setFont(new Font("Arial", Font.BOLD, buttonFontSize ));
-		btnKeyPadDelete.setBorder(new LineBorder(Color.WHITE));
+		//btnKeyPadDelete.setFont(new Font("Arial", Font.BOLD, buttonFontSize ));
+		//btnKeyPadDelete.setBorder(new LineBorder(Color.WHITE));
 		this.add(btnKeyPadDelete);
 
 		JButton btnKeyPad_0 = new TrButtonHighlight("0", new Dimension(), false);

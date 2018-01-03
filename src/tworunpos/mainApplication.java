@@ -6,6 +6,7 @@ import Devices.DeviceManager;
 import GuiElements.TrSounds;
 import com.mongodb.DB;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -138,6 +139,18 @@ public class mainApplication {
 //		}
 
 
+		try {
+			//UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
 
 		/*
 		 * start the mainapplication 

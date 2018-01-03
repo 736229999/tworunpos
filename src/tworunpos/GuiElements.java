@@ -179,8 +179,8 @@ public class GuiElements {
 	public final JProgressBar getStyledDefaultProgressBar(int start, int end){
 		JProgressBar progressBar = new JProgressBar(start, end);
 		  progressBar.setStringPainted(true);
-		  progressBar.setBackground(GuiElements.buttonBackgroundColorGeneral);
-		  progressBar.setForeground(GuiElements.buttonForegroundColorGeneral);
+		  //progressBar.setBackground(GuiElements.buttonBackgroundColorGeneral);
+		  //progressBar.setForeground(GuiElements.buttonForegroundColorGeneral);
 		  progressBar.setBorder(GuiElements.buttonBorderGeneral);
 		  return progressBar;
 	}
@@ -189,8 +189,8 @@ public class GuiElements {
 	public final JButton getStyledDefaultButton(String text, Dimension dim, Boolean border){
 		JButton button = new JButton(text);
 		button.setOpaque(true);
-		button.setBackground(GuiElements.buttonBackgroundColorGeneral);
-		button.setForeground(GuiElements.buttonForegroundColorGeneral);
+		//button.setBackground(GuiElements.buttonBackgroundColorGeneral);
+		//button.setForeground(GuiElements.buttonForegroundColorGeneral);
 		if(border == true){
 			button.setBorder(GuiElements.buttonBorderGeneral);
 		}else{
@@ -208,8 +208,8 @@ public class GuiElements {
 	public final JButton getStyledAbortButton(String text, Dimension dim, Boolean border){
 		JButton button = new JButton(text);
 		button.setOpaque(true);
-		button.setForeground(GuiElements.buttonForegroundColorAbort);
-		button.setBackground(GuiElements.buttonBackgroundColorAbort);
+		//button.setForeground(GuiElements.buttonForegroundColorAbort);
+		//button.setBackground(GuiElements.buttonBackgroundColorAbort);
 		if(border == true){
 			button.setBorder(GuiElements.buttonBorderGeneral);
 		}else{
@@ -223,8 +223,8 @@ public class GuiElements {
 	public final JButton getStyledCtaButton(String text, Dimension dim, Boolean border){
 		JButton button = new JButton(text);
 		button.setOpaque(true);
-		button.setForeground(GuiElements.buttonForegroundColorCTA);
-		button.setBackground(GuiElements.buttonBackgroundColorCTA);
+		//button.setForeground(GuiElements.buttonForegroundColorCTA);
+		//button.setBackground(GuiElements.buttonBackgroundColorCTA);
 		if(border == true){
 			button.setBorder(GuiElements.buttonBorderGeneral);
 		}else{
@@ -239,8 +239,8 @@ public class GuiElements {
 	public final JButton getStyledHighlightButton(String text, Dimension dim, Boolean border){
 		JButton button = new JButton(text);
 		button.setOpaque(true);
-		button.setBackground(GuiElements.buttonBackgroundColorHighlight);
-		button.setForeground(GuiElements.buttonForegroundColorHighlight);
+		//button.setBackground(GuiElements.buttonBackgroundColorHighlight);
+		//button.setForeground(GuiElements.buttonForegroundColorHighlight);
 		button.setText(text);
 		if(border == true){
 			button.setBorder(GuiElements.buttonBorderHighlight);

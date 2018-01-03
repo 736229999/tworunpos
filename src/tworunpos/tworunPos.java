@@ -660,9 +660,9 @@ public class tworunPos extends JFrame {
 		};
 		
 		JTableHeader header = table.getTableHeader();
-	      header.setBackground(GuiElements.buttonBackgroundColorGeneral);
-	      header.setForeground(Color.white);	      
-	      header.setBorder(BorderFactory.createLineBorder(GuiElements.buttonBackgroundColorGeneral));
+	      //header.setBackground(GuiElements.buttonBackgroundColorGeneral);
+	      //header.setForeground(Color.white);
+	      //header.setBorder(BorderFactory.createLineBorder(GuiElements.buttonBackgroundColorGeneral));
 	      Dimension headerDimension = header.getPreferredSize();
 	      headerDimension.setSize(headerDimension.getWidth(), headerDimension.getHeight()+10);
 	      header.setPreferredSize(headerDimension);

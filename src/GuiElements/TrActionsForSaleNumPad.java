@@ -90,7 +90,7 @@ public class TrActionsForSaleNumPad extends JPanel {
 		});
 		
 		
-		final TrToggleButton buttonActionDepositRefund = new TrToggleButton("Pfandrücknahme", new Dimension(), false);
+		final TrToggleButton buttonActionDepositRefund = new TrToggleButton("Pfand", new Dimension(), false);
 		this.add(buttonActionDepositRefund);
 		buttonActionDepositRefund.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

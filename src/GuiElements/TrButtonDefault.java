@@ -25,9 +25,9 @@ public class TrButtonDefault extends TrButton {
 	
 	
 	public TrButtonDefault(String text, Dimension dim, Boolean border){		
-		this.setOpaque(true);
-		this.setBackground(buttonBackgroundColorGeneral);
-		this.setForeground(buttonForegroundColorGeneral);
+		//this.setOpaque(true);
+		//this.setBackground(buttonBackgroundColorGeneral);
+		//this.setForeground(buttonForegroundColorGeneral);
 		this.setText(text);
 		if(border == true){
 			this.setBorder(buttonBorderGeneral);
@@ -40,7 +40,7 @@ public class TrButtonDefault extends TrButton {
 		this.setFocusPainted(false);
 		this.setSize(dim);
 		this.setPreferredSize(dim);
-		
+
 		
 	}
 	

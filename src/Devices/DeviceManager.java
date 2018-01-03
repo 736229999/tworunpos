@@ -21,9 +21,11 @@ public class DeviceManager {
 	JPosScanner scanner = null;
 	JLineDisplay lineDisplay = null;
 	ComScaleDialog06 scale = null;
+	JPosPrinter printer1 = null;
 
 
-	
+
+
 	public DeviceManager()  throws Exception
 	{
 		System.setProperty("jpos.config.populatorFile", "jpos.xml");

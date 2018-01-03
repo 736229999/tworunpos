@@ -1,7 +1,6 @@
 package GuiElements;
 
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -17,16 +16,16 @@ public class TrButtonHighlight extends TrButton {
 
 	
 	
-	static Color buttonBackgroundColorHighlight = new Color(118, 166, 166);
+	static Color buttonBackgroundColorHighlight = Color.RED;
 	static Color buttonForegroundColorHighlight = Color.WHITE;
 	static Color buttonBorderColorHighlight = Color.WHITE;
 	static Border buttonBorderHighlight = BorderFactory.createLineBorder(buttonBorderColorGeneral, 2);
 	
 	
 	public TrButtonHighlight(String text, Dimension dim, Boolean border){		
-		this.setOpaque(true);
-		this.setBackground(buttonBackgroundColorHighlight);
-		this.setForeground(buttonForegroundColorHighlight);
+		//this.setOpaque(true);
+		//this.setBackground(buttonBackgroundColorHighlight);
+		//this.setForeground(buttonForegroundColorHighlight);
 		this.setText(text);
 		if(border == true){
 			this.setBorder(buttonBorderHighlight);
@@ -35,8 +34,10 @@ public class TrButtonHighlight extends TrButton {
 		}
 		this.setSize(dim);
 		this.setPreferredSize(dim);
-		;
+		//setContentAreaFilled(false);
+		//setFocusPainted(false);
+
 	}
-	
+
 	
 }

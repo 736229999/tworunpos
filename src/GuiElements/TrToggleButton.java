@@ -24,9 +24,9 @@ public class TrToggleButton extends JToggleButton {
 
 	
 	public TrToggleButton(String text, Dimension dim, Boolean border){		
-		this.setOpaque(true);
-		this.setBackground(buttonBackgroundColorGeneral);
-		this.setForeground(buttonForegroundColorGeneral);
+		//this.setOpaque(true);
+		//this.setBackground(buttonBackgroundColorGeneral);
+		//this.setForeground(buttonForegroundColorGeneral);
 		this.setText(text);
 		if(border == true){
 			this.setBorder(buttonBorderGeneral);
