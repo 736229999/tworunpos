@@ -44,7 +44,7 @@ public class Config {
 	private boolean useCurrencySymbolOnReceipt = false;
 	private boolean useCurrencyNameOnReceipt = false;
 	private String[] weighItems =  new String[10];
-
+	private Integer posNo = 1;
     private JSONObject devices;
 
 
@@ -59,18 +59,22 @@ public class Config {
 
             String filePath = new File("").getAbsolutePath();
             filePath = filePath.concat(configFileDirectory+configFilename);
+
             Object object = parser.parse(new FileReader(filePath));
             JSONObject jsonObject = (JSONObject)object;
 
+            System.out.println(jsonObject.toJSONString());
+			// get posNo
+			posNo  = ((Long)jsonObject.get("posNo")).intValue();
+
 
 			// get debugmode
-			Boolean json_debugMode = (Boolean) jsonObject.get("debugMode");
-			debugMode = json_debugMode;
+			debugMode = (Boolean) jsonObject.get("debugMode");
 			
 			
 			// get path of mongodb
-			String json_mongoDbLocation =  jsonObject.get("mongoDbLocation").toString();
-			mongoDbLocation = json_mongoDbLocation;
+			mongoDbLocation =  jsonObject.get("mongoDbLocation").toString();
+
 			
 
 			// get currency symbol
@@ -123,6 +127,7 @@ public class Config {
 
 	}
 
+	public Integer getPosNo() {return posNo;}
 
 	public Boolean isLineDisplayActive(){
         return isDeviceActive("lineDisplay");
@@ -161,7 +166,8 @@ public class Config {
     }
 
 
-    //get name of devices
+
+	//get name of devices
     public String getScannerName(){return getDeviceName("scanner");}
     public String getPrinterName(){return getDeviceName("printer");}
     public String getLineDisplayName(){return getDeviceName("linedisplay");}
@@ -272,6 +278,9 @@ public class Config {
 
 
             Config config =  Config.getInstance();
+
+            System.out.println("scaleActive "+config.isScaleActive().toString());
+			System.out.println("posNo "+config.getPosNo().toString());
 
 
         }

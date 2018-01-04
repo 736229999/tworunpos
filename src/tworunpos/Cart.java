@@ -3,10 +3,7 @@ package tworunpos;
 import Devices.ComScaleDialog06;
 import Devices.DeviceManager;
 import Devices.JPosPrinter;
-import Exceptions.CheckoutGeneralException;
-import Exceptions.CheckoutPaymentException;
-import Exceptions.DeviceException;
-import Exceptions.ScaleException;
+import Exceptions.*;
 import Prints.Receipt;
 import com.mongodb.*;
 import com.usb.core.Device;
@@ -39,7 +36,9 @@ public class Cart extends Observable {
 	private String paymentType;
 	private Double paymentGiven;
 	private String transactionType;
-	private Integer transactionZ;
+	private Integer zNo;
+	private Integer transactionNo;
+	private Integer posNo;
 	private Double transactionAmountGross;
 	private Double 	transactionAmountNet;
 	private Integer cashierId;
@@ -86,7 +85,7 @@ public class Cart extends Observable {
 	public Cart(DBObject cartObject){
 
 		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
-		transactionZ = (cartObject.get("transactionZ") != null ? (Integer) cartObject.get("transactionZ"):null);
+		zNo = (cartObject.get("zNo") != null ? (Integer) cartObject.get("zNo"):null);
 		dateTimeAtStartTransaction =  (cartObject.get("dateTimeAtStartTransaction") != null ?  (Date) ( cartObject.get("dateTimeAtStartTransaction")) :null);
 		dateTimeAtEndTransaction = (cartObject.get("dateTimeAtEndTransaction") != null ?  (Date) cartObject.get("dateTimeAtEndTransaction") :null);
 		transactionType = (cartObject.get("transactionType") != null ?   cartObject.get("transactionType").toString() : null );
@@ -110,6 +109,7 @@ public class Cart extends Observable {
 	public Cart(){
 		
 		dateTimeAtStartTransaction = new Date();
+		posNo = Config.getInstance().getPosNo();
 		transactionCollection = db.getCollection("transactionList");
 	}
 	
@@ -451,7 +451,7 @@ public class Cart extends Observable {
 	/*
 	This method is the final checkout step! It will save the transaction to the database.
 	 */
-	public Boolean finilize() throws CheckoutPaymentException,CheckoutGeneralException {
+	public Boolean finilize() throws CheckoutPaymentException, CheckoutGeneralException, CounterException, ZSessionException {
 
 		//check if everthing is ok
 
@@ -479,6 +479,17 @@ public class Cart extends Observable {
 			throw new CheckoutPaymentException("Der Zahlbetrag ist nicht hoch genug!!");
 		}
 
+
+
+		//get next counter (id) for this transaction
+		Counter transactionCounter = new Counter(Transaction.class.getSimpleName());
+		transactionNo = transactionCounter.getCounter();
+
+		//get current z no
+		ZSessionList z = new ZSessionList();
+		zNo = z.getOpenZSession().getCounter();
+
+
 		//prepare for receipt printout
 		this.createGroupedTaxes();
 		DebugScreen.getInstance().clear();
@@ -488,14 +499,14 @@ public class Cart extends Observable {
 
 		//save transaction in db
 		dateTimeAtEndTransaction = new Date();
-		Transaction transaction = new Transaction(this);
+
+
+		Transaction transaction = new Transaction(this, transactionNo, zNo);
 		TransactionList transactionList = TransactionList.getInstance();
 		transactionList.addTransaction(transaction);
 
-		//BasicDBObject transactionObject = getMyDocument();
-		//transactionCollection.insert(transactionObject);
-
-
+		//increment transcction id for the next one
+		transactionCounter.increment();
 
 
 		//print receipt
@@ -510,7 +521,6 @@ public class Cart extends Observable {
 			try {
 				printer.print(receipt.toString());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -529,7 +539,7 @@ public class Cart extends Observable {
 		
 		//create basic transaction attributes
 		BasicDBObject mainDocument = new BasicDBObject();
-		mainDocument.put("transactionZ", 1); //todo bind to Z-Number
+		mainDocument.put("zNo", 1); //todo bind to Z-Number
 		mainDocument.put("transaction", this.dateTimeAtStartTransaction);
 		mainDocument.put("transactionDateTimeAtStart", this.dateTimeAtStartTransaction);
 		mainDocument.put("transactionDateTimeAtEnd", this.dateTimeAtEndTransaction);
@@ -627,6 +637,19 @@ public class Cart extends Observable {
 
 	public Date getDateTimeAtEndTransaction() {
 		return dateTimeAtEndTransaction;
+	}
+
+
+	public Integer getzNo() {
+		return zNo;
+	}
+
+	public Integer getTransactionNo() {
+		return transactionNo;
+	}
+
+	public Integer getPosNo() {
+		return posNo;
 	}
 
 	public void reset(){

@@ -10,11 +10,10 @@ import java.util.Calendar;
 import java.util.Vector;
 
 
+public class ZReport implements Print {
 
-public class Receipt implements Print {
 
-	
-	
+
 	//a receipt is designed in that way:
 	/* --------------------
 	 * TITLE
@@ -33,10 +32,10 @@ public class Receipt implements Print {
 	 * --------------------
 	 * FOOTER 2
 	 * --------------------
-	 * 
+	 *
 	 */
-    
-	  
+
+
 	//////////// printNormal() function ///////////////////////////////////////
     //   ESC + "|rA"          -> Right alignment
     //   ESC + "|cA"          -> Center alignment
@@ -44,7 +43,7 @@ public class Receipt implements Print {
     //   ESC + "|bC"          -> normal-bold character printing // we call it just bold
     //   ESC + "|uC"          -> Underline character printing
 	/////////////////////////////////////////////////////////////////////////////
-	
+
     // constants defined for convience sake (could be inlined)
     private String ESC    = ((char) 0x1b) + "";
     private String LF     = ((char) 0x0a) + "";
@@ -55,7 +54,7 @@ public class Receipt implements Print {
     private String title ="Bon";
     private String head = "";
     private String body = "";
-    
+
     private Vector articles = new Vector();
     private String totalGross;
     private String totalNet;
@@ -66,27 +65,27 @@ public class Receipt implements Print {
     private Integer zNo;
     private Integer transactionNo;
     private Integer posNo;
-    
+
     private String taxesTitle ="Steuern";
     private String taxes;
-    
+
     private String footer1 = "";
     private String footer2 = "";
     private String horizontalRuleSign = "-";
-    
+
     private boolean useCurrencySymbol = Config.getInstance().isUseCurrencySymbolOnReceipt();
     private boolean useCurrencyName = Config.getInstance().isUseCurrencyNameOnReceipt();
     private String currencySymbol = "€";
     private String currencyName = "EUR";
-    
 
-    
-	
+
+
+
     //char width of printer - default value
     private int charWidth = 42;
 
-	
-	public Receipt() {
+
+	public ZReport() {
 		//currencySymbol = Config.getInstance().getCurrencySymbol();
 		//if(currencySymbol == "€")
 			currencySymbol = Config.getInstance().getCurrencySymbol();

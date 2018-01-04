@@ -41,9 +41,9 @@ public class ZSession {
 
 	public void close() throws ZSessionException {
 	    //todo do all calcucaltions
-
         dateTimeAtEndSession = new Date();
         save();
+
 
     };
 

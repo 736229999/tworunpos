@@ -985,7 +985,16 @@ public class tworunPos extends JFrame {
 	private void finilizeTransaction(){
 		try {
 			cart.setPaymentGiven(textfieldOne.getText());
-			Boolean savedCorrectly = cart.finilize();
+			Boolean savedCorrectly = null;
+			try {
+				savedCorrectly = cart.finilize();
+			} catch (CounterException e) {
+				GuiElements.displayErrorMessageBox("Fehler beim Speichern! Bitte beim Support melden! (1)");
+				e.printStackTrace();
+			} catch (ZSessionException e) {
+				GuiElements.displayErrorMessageBox("Fehler beim Speichern! Bitte beim Support melden! (2)");
+				e.printStackTrace();
+			}
 			if(savedCorrectly == true){
 				state.changeState(PosState.posStateReady);
 			}

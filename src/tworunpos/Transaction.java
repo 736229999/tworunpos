@@ -1,5 +1,7 @@
 package tworunpos;
 
+import Exceptions.CounterException;
+import Exceptions.ZSessionException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -24,10 +26,13 @@ A Transaction represents a finilized sales process. That means items has beeen a
 	private Double sumOfReturnedArticlesInclTax;
 	private Double sumOfReturnedArticlesExclTax;
 
+	private Integer transactionNo;
+	private Integer posNo;
+	private Integer zNo;
 
 
 	public Transaction(DBObject transactionDbObject){
-//todo save all articles as well for the transfer
+
 		
 		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
 		zReference = (transactionDbObject.get("zReference") != null ? (Integer) transactionDbObject.get("zReference"):null);
@@ -44,12 +49,15 @@ A Transaction represents a finilized sales process. That means items has beeen a
 		sumOfReturnedArticlesInclTax = (transactionDbObject.get("sumOfReturnedArticlesInclTax") != null ? (Double) transactionDbObject.get("sumOfReturnedArticlesInclTax"):null);
 		sumOfReturnedArticlesExclTax = (transactionDbObject.get("sumOfReturnedArticlesExclTax") != null ? (Double) transactionDbObject.get("sumOfReturnedArticlesExclTax"):null);
 		cart = (transactionDbObject.get("cart") != null ? new Cart((DBObject) transactionDbObject.get("cart")):null);
+		transactionNo = (transactionDbObject.get("transactionNo") != null ? (Integer) transactionDbObject.get("transactionNo"):null);
+		posNo = (transactionDbObject.get("posNo") != null ? (Integer) transactionDbObject.get("posNo"):null);
+		zNo = (transactionDbObject.get("zNo") != null ? (Integer) transactionDbObject.get("zNo"):null);
 
 	}
 
 
 
-	public Transaction(Cart cartObj){
+	public Transaction(Cart cartObj, Integer transactionCounter, Integer zCounter) throws CounterException, ZSessionException {
 		cart = cartObj;
 		zReference = 1;
 		dateTimeAtStartTransaction = cart.getDateTimeAtStartTransaction();
@@ -64,6 +72,10 @@ A Transaction represents a finilized sales process. That means items has beeen a
 		countOfReturnedArticles = cart.getCountOfReturnedArticles() ;
 		sumOfReturnedArticlesInclTax = cart.getSumOfReturnedArticlesInclTax();
 		sumOfReturnedArticlesExclTax = cart.getSumOfReturnedArticlesExclTax();
+
+		transactionNo = transactionCounter;
+		posNo = Config.getInstance().getPosNo();
+		zNo = zCounter;
 
 	}
 
@@ -117,7 +129,12 @@ A Transaction represents a finilized sales process. That means items has beeen a
 			mainDocument.put("sumOfReturnedArticlesInclTax",sumOfReturnedArticlesInclTax);
 		if(sumOfReturnedArticlesExclTax != null )
 			mainDocument.put("sumOfReturnedArticlesExclTax",sumOfReturnedArticlesExclTax);
-
+		if(transactionNo != null )
+			mainDocument.put("transactionNo",transactionNo);
+		if(posNo != null )
+			mainDocument.put("posNo",posNo);
+		if(zNo != null )
+			mainDocument.put("zNo",zNo);
 		return mainDocument;
 	}
 	
