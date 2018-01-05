@@ -4,7 +4,7 @@ import javax.swing.JOptionPane;
 
 public class TrDialogYesNo extends JOptionPane {
 
-	private int yesNo = 0;
+	private int yesNo = 1;
 	
 	public TrDialogYesNo(String text, String title){
 		
@@ -13,6 +13,6 @@ public class TrDialogYesNo extends JOptionPane {
 	}
 	
 	public boolean isYes(){
-		return (yesNo == 0 ? true : false);
+		return (yesNo == JOptionPane.YES_OPTION ? true : false);
 	}
 }

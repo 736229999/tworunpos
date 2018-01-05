@@ -316,18 +316,24 @@ public class ZReport implements Print {
 	}
 	
 	public String getBody(){
-		if(body != ""){
 
-			body += createNewFullLine("Z-Nummer", 15, 15, zSession.getCounter().toString(), 10, 10, "normal");
-			body += createNewFullLine("Gestartet", 15, 15, zSession.getSesssionOpenedByUserId(), 10, 10, "normal");
-			body += createNewFullLine("", 15, 15, zSession.getDateTimeAtStartSession().toString(), 10, 10, "normal");
-			body += createNewFullLine("Beendet", 15, 15, zSession.getSesssionClosedByUserId(), 10, 10, "normal");
-			body += createNewFullLine("", 15, 15, zSession.getDateTimeAtEndSession().toString(), 10, 10, "normal");
+		String userOpened = (zSession.getSesssionOpenedByUserId() != null ? zSession.getSesssionOpenedByUserId().toString():"");
+		String userClosed = (zSession.getSesssionClosedByUserId() != null ? zSession.getSesssionClosedByUserId().toString():"");
+
+		SimpleDateFormat sdf = new SimpleDateFormat("d.M.y HH:mm:ss");
 
 
-			return body+LF+horizontalRule();			
-		}
-		return body;
+		String datetimeClosed = (zSession.getDateTimeAtEndSession() != null ? sdf.format(zSession.getDateTimeAtEndSession()):"");
+		String datetimeOpened = (zSession.getDateTimeAtStartSession() != null ? sdf.format(zSession.getDateTimeAtStartSession()):"");
+
+		body += createNewFullLine("Z-Nummer", 15, 15, zSession.getCounter().toString(), 27, 27, "bold");
+		body += createNewFullLine("Gestartet von", 15, 15, userOpened, 27, 27, "normal");
+		body += createNewFullLine("", 15, 15, datetimeOpened, 20, 20, "normal");
+		body += createNewFullLine("Beendet von", 15, 15, userClosed, 27, 27, "normal");
+		body += createNewFullLine("", 15, 15, datetimeClosed, 20, 20, "normal");
+
+		return body+LF+horizontalRule();
+
 	}
 	
 	
@@ -345,17 +351,15 @@ public class ZReport implements Print {
 		
 		
 		int twoColumnsWidth = charWidth/2;
-		footer1 = createNewFullLine("Datum", twoColumnsWidth, twoColumnsWidth, "POS/Z/TRANS", twoColumnsWidth, twoColumnsWidth, "normal");
+		footer1 = createNewFullLine("Datum", twoColumnsWidth, twoColumnsWidth, "", twoColumnsWidth, twoColumnsWidth, "normal");
 		
 		Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("d.M.y HH:mm:ss");
         String dateAndTime =  sdf.format(cal.getTime());
 
-        String pos = (posNo != null ? posNo.toString() : "");
-		String z = (zNo != null ? zNo.toString() : "");
-		String trans = (transactionNo != null ? transactionNo.toString() : "");
 
-        footer1 += createNewFullLine(dateAndTime, twoColumnsWidth, twoColumnsWidth, pos+"/"+z+"/"+trans, twoColumnsWidth, twoColumnsWidth, "normal");
+
+        footer1 += createNewFullLine(dateAndTime, twoColumnsWidth, twoColumnsWidth, "", twoColumnsWidth, twoColumnsWidth, "normal");
 
 		
 		if(footer1 != ""){

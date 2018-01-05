@@ -148,11 +148,10 @@ public class tworunPos extends JFrame {
 
         //----------------- LOGIN
 		this.salesUser = new User();
+
+
 		//start the loginmask to login; this method will stop the process here, until user logs in
 		state.changeStateToLogin(false);
-
-
-
         while(!salesUser.loggedIn()){};
 
 		//------------------ZSession
@@ -245,7 +244,7 @@ public class tworunPos extends JFrame {
 		zSessionList = new ZSessionList();
 		try {
 			openZSession = zSessionList.getOpenZSession(salesUser);
-			//GuiElements.displayInfoMessageBox("Z-No: "+openZSession.getCounter());
+			GuiElements.displayInfoMessageBox("Z-No: "+openZSession.getCounter());
 		} catch (ZSessionException e) {
 			GuiElements.displayInfoMessageBox("Z-Fehler: "+e.getMessage());
 
@@ -268,6 +267,9 @@ public class tworunPos extends JFrame {
                     //close the loginscreen and continue with sale screen
                     loginmask.setVisible(false); //you can't see me!
                     loginmask.dispose(); //Destroy the JFrame object
+
+
+					initZSession();
 					state.changeStateToReady(true);
                 }
 				else if(action == "logout"){
@@ -837,15 +839,16 @@ public class tworunPos extends JFrame {
 					TrDialogYesNo trd = new TrDialogYesNo("Z-Bericht erstellen?","Tagesabschluss");
 
 					if(trd.isYes()){
-						ZSession zSession = zSessionList.getOpenZSession(salesUser);
-						zSessionList.closeOpenZSession();
+						ZSession zSessionTemp = zSessionList.getOpenZSession(salesUser);
+						zSessionList.closeOpenZSession(salesUser);
 
 						openZSession = null;
 
-						TrDialogYesNo trdPrint = new TrDialogYesNo("Z-Bericht erfolgreich erstellen! Möchten Sie diesen drucken?","Tagesabschluss");
+						TrDialogYesNo trdPrint = new TrDialogYesNo("Z-Bericht erfolgreich erstellt! Möchten Sie diesen drucken?","Tagesabschluss");
 						if(trd.isYes()) {
+							zSessionTemp = zSessionList.getZSessionByObejctId(zSessionTemp.getMongoId());
 							ZReport zPrint = new ZReport();
-							zPrint.setZSession(zSession);
+							zPrint.setZSession(zSessionTemp);
 							DeviceManager.getInstance().getPrinter().print(zPrint.toString());
 						}
 

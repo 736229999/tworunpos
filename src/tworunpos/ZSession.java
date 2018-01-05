@@ -4,6 +4,7 @@ import Exceptions.CounterException;
 import Exceptions.ZSessionException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.bson.types.ObjectId;
 
 import java.util.Date;
 
@@ -13,6 +14,7 @@ public class ZSession {
 
 	private Integer counter;
 
+	private ObjectId mongoId;
 	private Date dateTimeAtStartSession;
 	private Date dateTimeAtEndSession;
 	private String sesssionOpenedByUserId;
@@ -40,7 +42,7 @@ public class ZSession {
 
 	}
 
-	public void close() throws ZSessionException {
+	public void close(User closer) throws ZSessionException {
 	    //todo do all calcucaltions
 		/*sesssionClosedByUserId
 		sumOfSessionGross;
@@ -54,7 +56,7 @@ public class ZSession {
 		sumOfDepositArticlesExclTax;*/
 
 
-
+		sesssionClosedByUserId = closer.getUserId();
         dateTimeAtEndSession = new Date();
 
         save();
@@ -64,8 +66,9 @@ public class ZSession {
 
 	public ZSession(DBObject transactionDbObject){
 
+		mongoId = (transactionDbObject.get("_id") != null ? (ObjectId)transactionDbObject.get("_id"):null);
+
 		counter = (transactionDbObject.get("counter") != null ? (Integer) transactionDbObject.get("counter"):null);
-		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
         dateTimeAtStartSession = (transactionDbObject.get("dateTimeAtStartSession") != null ? (Date) transactionDbObject.get("dateTimeAtStartSession"):null);
 		dateTimeAtEndSession =  (transactionDbObject.get("dateTimeAtEndSession") != null ?  (Date) ( transactionDbObject.get("dateTimeAtEndSession")) :null);
         sesssionOpenedByUserId = (transactionDbObject.get("sesssionOpenedByUserId") != null ?  (String) transactionDbObject.get("sesssionOpenedByUserId") :null);
@@ -93,7 +96,9 @@ public class ZSession {
     }
 
 
-
+	public ObjectId getMongoId() {
+		return mongoId;
+	}
 
 	public ZSession getZSession(){
 		return this;
@@ -122,6 +127,8 @@ public class ZSession {
 
 		//create basic transaction attributes
 		BasicDBObject mainDocument = new BasicDBObject();
+		if(mongoId != null )
+			mainDocument.put("_id",mongoId);
 		if(counter != null )
 			mainDocument.put("counter",counter);
 		if(dateTimeAtStartSession != null )

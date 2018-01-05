@@ -103,25 +103,18 @@ public class User  {
 	}
 	
 	public  void login(Integer entry) {
-		//todo real check for login
+
 		UserList userList = new UserList();
 		try {
-			userList.lookupUserById(entry.toString());
+			User tempuser =  userList.lookupUserById(entry.toString());
+			this.userId = tempuser.getUserId();
+			this.name = tempuser.getName();
 			setLoggedInStatus(true);
-
-			//notifyObservers( new Object[]{"login", article} );
-
-
 			DebugScreen.getInstance().print("Login für "+entry.toString()+" erfolgreich!");
-
-
-
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
 			setLoggedInStatus(false);
 			PosState.getInstance().changeStateToLogin(false);
-
 			DebugScreen.getInstance().print("Login für "+entry.toString()+" nicht erfolgreich!");
 		}
 		

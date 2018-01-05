@@ -4,6 +4,7 @@ package tworunpos;
 import Exceptions.CounterException;
 import Exceptions.ZSessionException;
 import com.mongodb.*;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 
@@ -23,11 +24,32 @@ public class ZSessionList {
 
 
 
+	public ZSession getZSessionByObejctId(ObjectId id) throws ZSessionException {
+
+		BasicDBObject query=new BasicDBObject("_id",id);
+		DBObject foundDocument = collection.findOne(query);
+
+		if(foundDocument != null){
+			ZSession z = new ZSession(foundDocument);
+			return z;
+		}
+		else
+			throw new ZSessionException("Kein offener Z-Session gefunden!");
+
+
+
+
+	}
+
+
 	/*
-	This method will return a list of Transaction by its ID
+	This method will return a list of Transaction by its Counter
 	 */
-	public  void getZSessionById(String id){
-		//todo
+	public ZSession getZSessionByCounter(Integer counter){
+		BasicDBObject query=new BasicDBObject("counter",counter);
+		DBObject foundDocument = collection.findOne(query);
+		ZSession z = new ZSession(foundDocument);
+		return z;
 	}
 
 
@@ -67,10 +89,10 @@ public class ZSessionList {
 	This method will close the currently open session. This means, it will lookup in the db for the latest
 	open one (by not existing end date) and will write an end date.
 	*/
-	public void closeOpenZSession() throws ZSessionException {
+	public void closeOpenZSession(User closer) throws ZSessionException {
 		ZSession zSession = null;
 
-
+		//find the latest Z Session with no end date
 		BasicDBObject search = new BasicDBObject("dateTimeAtEndSession", new BasicDBObject("$exists", false));
         BasicDBObject order = new BasicDBObject("_id",-1);
 
@@ -80,7 +102,7 @@ public class ZSessionList {
 
 		if(  result.one() != null  ){
 			zSession = new ZSession(result.one());
-			zSession.close();
+			zSession.close(closer);
 			DebugScreen.getInstance().print(zSession.getMyDocument().toString());
 		}else{
             DebugScreen.getInstance().print("Close Z action performed, but no Z found.");

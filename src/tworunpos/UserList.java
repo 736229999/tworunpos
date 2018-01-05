@@ -27,17 +27,10 @@ public class UserList {
 
 		BasicDBObject query = new BasicDBObject("userId", id);
 		DBObject foundDocument = userCollection.findOne(query);
-		
-		System.out.println("query: "+query.toString());
-		System.out.println("db: "+db.getName());
-		System.out.println("collection: "+userCollection.getName());
 
-		
 		if(foundDocument != null){
 			System.out.println("FOUND: "+foundDocument.toString());
-			System.out.println("Start Converting Doc to Article");
 			User foundUser = new User(foundDocument);
-			System.out.println("Finished Converting Doc to Article");
 			return foundUser;
 		}
 		else{
