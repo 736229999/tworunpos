@@ -36,7 +36,7 @@ public class ZSessionList {
 	This method will return the latest transaction
 	If there is no openSession it will create one
 	 */
-	public ZSession getOpenZSession() throws ZSessionException, CounterException {
+	public static ZSession getOpenZSession(User creator) throws ZSessionException, CounterException {
 		ZSession zSession = null;
 
 
@@ -50,8 +50,8 @@ public class ZSessionList {
 			DebugScreen.getInstance().print("open ZSession found: "+zSession.getMyDocument().toString());
 		}
 		else{
-			zSession= new ZSession();
-			this.addZSession(zSession);
+			zSession= new ZSession(creator);
+			addZSession(zSession);
 
 			//increment counter in DB
 			ZSession.incrementCounter();
@@ -147,7 +147,7 @@ public class ZSessionList {
 	 * this function will insert a transaction to the transaction list.
 	 * this means, its also added to the used database.
 	 */
-	public void addZSession(ZSession zSession){
+	public static void addZSession(ZSession zSession){
 		DebugScreen.getInstance().print("DB: Start insert Transaction into collection");
 		collection.insert(WriteConcern.SAFE,zSession.getMyDocument());
 		DebugScreen.getInstance().print("DB: Insert done");

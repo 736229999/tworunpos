@@ -45,6 +45,7 @@ import javax.swing.border.LineBorder;
 import Devices.DeviceManager;
 import Exceptions.CounterException;
 import Exceptions.ZSessionException;
+import Prints.ZReport;
 import org.apache.commons.lang.ArrayUtils;
 
 import Exceptions.CheckoutGeneralException;
@@ -243,7 +244,7 @@ public class tworunPos extends JFrame {
 
 		zSessionList = new ZSessionList();
 		try {
-			openZSession = zSessionList.getOpenZSession();
+			openZSession = zSessionList.getOpenZSession(salesUser);
 			//GuiElements.displayInfoMessageBox("Z-No: "+openZSession.getCounter());
 		} catch (ZSessionException e) {
 			GuiElements.displayInfoMessageBox("Z-Fehler: "+e.getMessage());
@@ -827,15 +828,37 @@ public class tworunPos extends JFrame {
 		panelHolder[0][1].add(btnSettings_zreport);
 		btnSettings_zreport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//todo printout Z-report
+
 
 				//Close the Z-Session
 				ZSessionList zSessionList = new ZSessionList();
 				try {
-					zSessionList.closeOpenZSession();
-					openZSession = null;
+
+					TrDialogYesNo trd = new TrDialogYesNo("Z-Bericht erstellen?","Tagesabschluss");
+
+					if(trd.isYes()){
+						ZSession zSession = zSessionList.getOpenZSession(salesUser);
+						zSessionList.closeOpenZSession();
+
+						openZSession = null;
+
+						TrDialogYesNo trdPrint = new TrDialogYesNo("Z-Bericht erfolgreich erstellen! Möchten Sie diesen drucken?","Tagesabschluss");
+						if(trd.isYes()) {
+							ZReport zPrint = new ZReport();
+							zPrint.setZSession(zSession);
+							DeviceManager.getInstance().getPrinter().print(zPrint.toString());
+						}
+
+						//print
+
+
+					}
+
 				} catch (ZSessionException e) {
-					new TrDialogYesNo(e.getMessage(),"Fehler");
+					GuiElements.displayErrorMessageBox(e.getMessage());
+					e.printStackTrace();
+				} catch (Exception e) {
+					GuiElements.displayErrorMessageBox(e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -987,7 +1010,7 @@ public class tworunPos extends JFrame {
 			cart.setPaymentGiven(textfieldOne.getText());
 			Boolean savedCorrectly = null;
 			try {
-				savedCorrectly = cart.finilize();
+				savedCorrectly = cart.finilize(ZSessionList.getOpenZSession(salesUser).getCounter());
 			} catch (CounterException e) {
 				GuiElements.displayErrorMessageBox("Fehler beim Speichern! Bitte beim Support melden! (1)");
 				e.printStackTrace();

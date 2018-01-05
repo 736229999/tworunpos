@@ -451,7 +451,7 @@ public class Cart extends Observable {
 	/*
 	This method is the final checkout step! It will save the transaction to the database.
 	 */
-	public Boolean finilize() throws CheckoutPaymentException, CheckoutGeneralException, CounterException, ZSessionException {
+	public Boolean finilize(Integer validZNo) throws CheckoutPaymentException, CheckoutGeneralException, CounterException, ZSessionException {
 
 		//check if everthing is ok
 
@@ -487,7 +487,7 @@ public class Cart extends Observable {
 
 		//get current z no
 		ZSessionList z = new ZSessionList();
-		zNo = z.getOpenZSession().getCounter();
+		zNo = validZNo;
 
 
 		//prepare for receipt printout

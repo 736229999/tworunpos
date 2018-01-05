@@ -1,9 +1,6 @@
 package Prints;
 
-import tworunpos.Cart;
-import tworunpos.CartArticle;
-import tworunpos.Config;
-import tworunpos.Helpers;
+import tworunpos.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -50,8 +47,9 @@ public class ZReport implements Print {
     private String EURO   = ((char) 0xD5) + "";
     private String SPACES = "                                                                      ";
 
+    private ZSession zSession;
 
-    private String title ="Bon";
+    private String title ="Z-Bericht";
     private String head = "";
     private String body = "";
 
@@ -292,31 +290,8 @@ public class ZReport implements Print {
 
 	}
 	
-	public void setArticles(Cart cart){
-		addNewEmptyLineToBody();
-		for(int i = 0; i < cart.getArticles().size(); i++){
-			addNewArticleLine(cart.getArticles().get(i));
-		}
-		
-		
-		double totalGross =cart.getSumOfCartGross() ;
-	    double totalNet =cart.getSumOfCartNet();
-	    double totalTax = totalGross-totalNet;
-	    double paymentGiven = cart.getPaymentGiven();
-	    double paymentChange = paymentGiven-totalGross;
-
-	    zNo = cart.getzNo();
-	    transactionNo = cart.getTransactionNo();
-	    posNo = cart.getPosNo();
-		
-		this.totalGross = prepareCurrencyForPrint(totalGross, "");
-	    this.totalNet = prepareCurrencyForPrint(totalNet,"");
-	    this.totalTax = prepareCurrencyForPrint(totalGross-totalNet, "");
-	    this.paymentGiven = prepareCurrencyForPrint(cart.getPaymentGiven(), "");
-	    this.paymentChange = prepareCurrencyForPrint(paymentGiven-totalGross, "");
-	    this.paymentChange = (paymentGiven-totalGross > 0 ?  "-"+this.paymentChange : this.paymentChange);
-	    this.paymentType = cart.getPaymentType();
-	    		
+	public void setZSession(ZSession z){
+		zSession = z;
 	}
 	
 
@@ -342,6 +317,14 @@ public class ZReport implements Print {
 	
 	public String getBody(){
 		if(body != ""){
+
+			body += createNewFullLine("Z-Nummer", 15, 15, zSession.getCounter().toString(), 10, 10, "normal");
+			body += createNewFullLine("Gestartet", 15, 15, zSession.getSesssionOpenedByUserId(), 10, 10, "normal");
+			body += createNewFullLine("", 15, 15, zSession.getDateTimeAtStartSession().toString(), 10, 10, "normal");
+			body += createNewFullLine("Beendet", 15, 15, zSession.getSesssionClosedByUserId(), 10, 10, "normal");
+			body += createNewFullLine("", 15, 15, zSession.getDateTimeAtEndSession().toString(), 10, 10, "normal");
+
+
 			return body+LF+horizontalRule();			
 		}
 		return body;
@@ -353,24 +336,7 @@ public class ZReport implements Print {
 		
 		//All Articles
 		String articlesTemp = "";
-		articlesTemp += createNewFullLine("", 15, 15, currencyName+"  ", 10, 10, "normal");
-		for(int i = 0; i < articles.size(); i++ ){
-			articlesTemp += articles.elementAt(i);
-		}
-		
-		
-		//Sums of receipt
-		articlesTemp += horizontalRule();
-		articlesTemp += createNewFullLine("Netto", 15, 15, totalNet, 10, 10, "normal");
-		articlesTemp += createNewFullLine("Zzgl. MwSt.", 15, 15, totalTax, 10, 10, "normal");
-		articlesTemp += createNewFullLine("zu zahlen", 15, 15, totalGross, 10, 10, "big");
-		articlesTemp += horizontalRule();
-		articlesTemp += createNewFullLine((!paymentType.isEmpty()?paymentType:"Gegeben"), 15, 15, paymentGiven, 10, 10, "bold");
-		articlesTemp += createNewFullLine("Rückgeld", 15, 15, paymentChange, 10, 10, "bold");
-		articlesTemp += LF;
 
-		
-		
 		
 		return articlesTemp;
 	}
@@ -402,7 +368,7 @@ public class ZReport implements Print {
 	
 	public String getFooter2(){
 				
-		footer2 = createNewCenteredLine("Vielen Dank für Ihren Einkauf :)", "bold");
+		footer2 = createNewCenteredLine("", "bold");
 		
 		if(footer2 != ""){
 			
@@ -425,7 +391,7 @@ public class ZReport implements Print {
 		wholeReceipt += getBody();
 
 		wholeReceipt += getArticles();
-		wholeReceipt += getTaxes();
+
 
 		wholeReceipt += getFooter1();
 		wholeReceipt += getFooter2();
@@ -461,65 +427,6 @@ public class ZReport implements Print {
 		return createNewCenteredLine(this.title, "bold")+LF;
 	}
 	
-	
-	public void setTaxes(Cart cart){
-		taxes ="";
-		Double vatTotalSum = 0.00D;
-		Double netTotalSum = 0.00D;
-		Double grossTotalSum = 0.00D;
-		
-		//title
-		taxes += createNewCenteredLine(taxesTitle, "normal");
-		
-		//headline
-		taxes += createNewFull4ColumnLine("MWST%",
-				"left",
-				"MWST",
-				"right",
-				"+  Netto",
-				"right",
-				"=  Brutto",
-				"right",
-				"normal");
-		
-		//groupedtaxes
-		for(int i=0;i<cart.getGroupedTaxes().size();i++){
-			
-			//sum up 
-			vatTotalSum += cart.getGroupedTaxes().get(i).vatSum;
-			netTotalSum += cart.getGroupedTaxes().get(i).netSum;
-			grossTotalSum += cart.getGroupedTaxes().get(i).grossSum;
-			
-			//create line for groupedtaxes
-			taxes += createNewFull4ColumnLine(cart.getGroupedTaxes().get(i).letterID+" "+cart.getGroupedTaxes().get(i).value+"%",
-					"left",
-					prepareCurrencyForPrint(cart.getGroupedTaxes().get(i).vatSum,""),
-					"right",
-					prepareCurrencyForPrint(cart.getGroupedTaxes().get(i).netSum,""),
-					"right",
-					prepareCurrencyForPrint(cart.getGroupedTaxes().get(i).grossSum,""),
-					"right",
-					"normal");
-		}
-		
-		
-		//summ
-		taxes += horizontalRule();
-		taxes += createNewFull4ColumnLine("Summe",
-				"left",
-				prepareCurrencyForPrint(vatTotalSum,""),
-				"right",
-				prepareCurrencyForPrint(netTotalSum,""),
-				"right",
-				prepareCurrencyForPrint(grossTotalSum,""),
-				"right",
-				"normal");
-		
-	}
-	
-	public String getTaxes() {
-		return taxes+LF;
-	}
 
 	
 	public String createNewCenteredLine(String text, String type) {

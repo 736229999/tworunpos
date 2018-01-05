@@ -15,8 +15,8 @@ public class ZSession {
 
 	private Date dateTimeAtStartSession;
 	private Date dateTimeAtEndSession;
-	private User sesssionOpenedByUserId;
-    private User sesssionClosedByUserId;
+	private String sesssionOpenedByUserId;
+    private String sesssionClosedByUserId;
 	private Double sumOfSessionGross;
 	private Double sumOfSessionNet;
 	private Double sumOfSessionTax;
@@ -32,16 +32,31 @@ public class ZSession {
 	private Double sumOfDepositArticlesExclTax;
 
 
-	public ZSession() throws CounterException {
+	public ZSession(User creator) throws CounterException {
 
         dateTimeAtStartSession = new Date();
-		 counter = new Counter(this.getClass().getSimpleName()).getCounter();
+		sesssionOpenedByUserId = creator.getUserId();
+		counter = new Counter(this.getClass().getSimpleName()).getCounter();
 
 	}
 
 	public void close() throws ZSessionException {
 	    //todo do all calcucaltions
+		/*sesssionClosedByUserId
+		sumOfSessionGross;
+		sumOfSessionNet;
+		sumOfSessionTax;
+		countOfReturnedArticles;
+		sumOfReturnedArticlesInclTax;
+		sumOfReturnedArticlesExclTax;
+		countOfDepositArticles;
+		sumOfDepositArticlesInclTax;
+		sumOfDepositArticlesExclTax;*/
+
+
+
         dateTimeAtEndSession = new Date();
+
         save();
 
 
@@ -53,8 +68,8 @@ public class ZSession {
 		//DebugScreen.getInstance().print(articleDbObject.get("plu").toString());
         dateTimeAtStartSession = (transactionDbObject.get("dateTimeAtStartSession") != null ? (Date) transactionDbObject.get("dateTimeAtStartSession"):null);
 		dateTimeAtEndSession =  (transactionDbObject.get("dateTimeAtEndSession") != null ?  (Date) ( transactionDbObject.get("dateTimeAtEndSession")) :null);
-        sesssionOpenedByUserId = (transactionDbObject.get("sesssionOpenedByUserId") != null ?  (User) transactionDbObject.get("sesssionOpenedByUserId") :null);
-        sesssionClosedByUserId = (transactionDbObject.get("sesssionClosedByUserId") != null ?  (User) transactionDbObject.get("sesssionClosedByUserId") :null);
+        sesssionOpenedByUserId = (transactionDbObject.get("sesssionOpenedByUserId") != null ?  (String) transactionDbObject.get("sesssionOpenedByUserId") :null);
+        sesssionClosedByUserId = (transactionDbObject.get("sesssionClosedByUserId") != null ?  (String) transactionDbObject.get("sesssionClosedByUserId") :null);
 		sumOfSessionGross = (transactionDbObject.get("sumOfSessionGross") != null ?   (Double) transactionDbObject.get("sumOfSessionGross") : null );
 		sumOfSessionNet = (transactionDbObject.get("sumOfSessionNet") != null ?   (Double) transactionDbObject.get("sumOfSessionNet") : null );
 		sumOfSessionTax =  (transactionDbObject.get("sumOfSessionTax") != null ? (Double) transactionDbObject.get("sumOfSessionTax"):null);
@@ -84,7 +99,21 @@ public class ZSession {
 		return this;
 	}
 
+	public Date getDateTimeAtStartSession() {
+		return dateTimeAtStartSession;
+	}
 
+	public Date getDateTimeAtEndSession() {
+		return dateTimeAtEndSession;
+	}
+
+	public String getSesssionOpenedByUserId() {
+		return sesssionOpenedByUserId;
+	}
+
+	public String getSesssionClosedByUserId() {
+		return sesssionClosedByUserId;
+	}
 
 	/*
 	 * This method will return the document object for a mongodb entry
